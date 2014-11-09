@@ -35,8 +35,13 @@ func main() {
 	}
 
 	taskName := "mocks" // TODO change this to `default`
-	if _, err := gobot.InvokeTask(taskName, 0); err != nil {
+	somethingWasDone, err := gobot.InvokeTask(taskName, 0)
+	if err != nil {
 		log.Fatal(err.Error())
+	}
+
+	if somethingWasDone == false {
+		log.Action("Task [<strong>%s</strong>] is up to date", taskName)
 	}
 }
 

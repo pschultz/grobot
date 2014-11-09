@@ -27,5 +27,5 @@ func (t *InstallDependencyTask) Invoke(path string) (bool, error) {
 	}
 
 	log.Action("Installing %s", path)
-	return true, gobot.Shell(command)
+	return true, gobot.Execute(command)
 }

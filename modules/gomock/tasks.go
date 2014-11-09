@@ -71,7 +71,7 @@ func (t *BuildMockFileTask) Invoke(invokedName string) (bool, error) {
 		command = fmt.Sprintf("%s -package %s", command, t.conf.MockPackage)
 	}
 
-	return true, gobot.Shell(command)
+	return true, gobot.Execute(command)
 }
 
 func (t *BuildMockFileTask) getMockSourcePath(invokedName string) (string, error) {

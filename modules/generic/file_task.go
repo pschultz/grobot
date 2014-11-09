@@ -30,7 +30,7 @@ func (t *FileTask) Dependencies(invokedName string) []string {
 }
 
 func (t *FileTask) Invoke(path string) (bool, error) {
-	exists, err := gobot.PathExists(path)
+	exists, _, _, err := gobot.ModificationDate(path)
 	if err != nil {
 		return false, err
 	}
@@ -50,5 +50,5 @@ func (t *CreateFolderTask) Dependencies(invokedName string) []string {
 }
 
 func (t *CreateFolderTask) Invoke(path string) (bool, error) {
-	return true, gobot.Shell(`mkdir -p "%s"`, path)
+	return true, gobot.Execute(`mkdir -p "%s"`, path)
 }
