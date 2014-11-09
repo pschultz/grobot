@@ -8,34 +8,6 @@ import (
 	"regexp"
 )
 
-type AllMocksTask struct {
-	mockFiles []string
-}
-
-func NewAllMocksTask(conf Configuration) *AllMocksTask {
-	task := AllMocksTask{}
-	task.mockFiles = make([]string, len(conf.Mocks))
-	fileEnding, _ := regexp.Compile(`\.go$`)
-	for i, mockSource := range conf.Mocks {
-		mockFile := path.Base(mockSource)
-		fileEnding.ReplaceAllString(mockFile, "_mock.go")
-		task.mockFiles[i] = fmt.Sprintf("%s/%s", conf.MockFolder, mockFile)
-	}
-	return &task
-}
-
-func (t *AllMocksTask) Description() string {
-	return "Build all mocks defined in the config file"
-}
-
-func (t *AllMocksTask) Dependencies(name string) []string {
-	return t.mockFiles
-}
-
-func (t *AllMocksTask) Invoke(invokedName string) (bool, error) {
-	return false, nil
-}
-
 type BuildMockFileTask struct {
 	conf Configuration
 }
@@ -58,17 +30,26 @@ func (t *BuildMockFileTask) Dependencies(invokedName string) []string {
 	}
 }
 
-func (t *BuildMockFileTask) Invoke(invokedName string) (bool, error) {
-	mockSource, err := t.getMockSourcePath(invokedName)
+func (t *BuildMockFileTask) Invoke(targetName string) (bool, error) {
+	mockSource, err := t.getMockSourcePath(targetName)
 	if err != nil {
 		return false, err
 	}
 
-	log.Action("Generating mock: %s from %s", invokedName, mockSource)
+	mockConfig, isSet := t.conf.Mocks[mockSource]
+	if isSet == false {
+		return false, fmt.Errorf("Logic error in BuildMockFileTask: could not find mock configuration for mock source %s (target [%s])", mockSource, targetName)
+	}
+
+	log.Action("Generating mock: %s from %s", targetName, mockSource)
 	mockGenBinary := "vendor/bin/mockgen"
-	command := fmt.Sprintf(`%s -source "%s" -destination "%s"`, mockGenBinary, mockSource, invokedName)
+	command := fmt.Sprintf(`%s -source "%s" -destination "%s"`, mockGenBinary, mockSource, targetName)
 	if t.conf.MockPackage != "" {
 		command = fmt.Sprintf("%s -package %s", command, t.conf.MockPackage)
+	}
+
+	if mockConfig.Imports != "" {
+		command = fmt.Sprintf(`%s -imports "%s"`, command, mockConfig.Imports)
 	}
 
 	return true, grobot.Execute(command)
@@ -79,7 +60,7 @@ func (t *BuildMockFileTask) getMockSourcePath(invokedName string) (string, error
 	baseName := path.Base(invokedName)
 	baseName = fileEnding.ReplaceAllString(baseName, ".go")
 
-	for _, sourceName := range t.conf.Mocks {
+	for sourceName, _ := range t.conf.Mocks {
 		if path.Base(sourceName) == baseName {
 			return sourceName, nil
 		}

@@ -45,7 +45,7 @@ func (m *Module) registerTasks() {
 	grobot.RegisterTask("mocks", NewAllMocksTask(m.conf))
 	grobot.RegisterFolder(m.conf.MockFolder)
 
-	genericMockBuildRule := fmt.Sprintf(`^%s/\w+\.go$`, m.conf.MockFolder)
+	genericMockBuildRule := fmt.Sprintf(`^%s/\w+_mock\.go$`, m.conf.MockFolder)
 	grobot.RegisterRule(genericMockBuildRule, NewBuildMockFileTask(m.conf))
 
 }

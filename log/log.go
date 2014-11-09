@@ -65,7 +65,7 @@ func coloredOutputLn(format, color string, args ...interface{}) {
 func AskBool(question string, args ...interface{}) bool {
 	var input string
 	for input != "y" && input != "n" {
-		coloredOutput(question+" [Yn] ", yellowColor, args...)
+		coloredOutput("➤ "+question+" [Yn] ", yellowColor, args...)
 		_, err := fmt.Scanf("%s", &input)
 		if err != nil {
 			panic(fmt.Errorf("Could not read input : %s", err.Error()))

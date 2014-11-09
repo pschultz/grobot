@@ -2,9 +2,12 @@
     "gomock": {
         "folder": "tests/mocks",
         "package": "mocks",
-        "mocks": [
-            "tests/fixtures/mock_source1.go",
-            "tests/fixtures/mock_source2.go"
-        ]
+        "mocks": {
+            "shell.go": {},
+            "task.go": {},
+            "file_system.go": {
+                "imports": ".=github.com/fgrosse/grobot"
+            }
+        }
     }
 }

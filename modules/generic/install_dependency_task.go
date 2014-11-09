@@ -14,7 +14,7 @@ func NewInstallDependencyTask(dependency string) *InstallDependencyTask {
 	return &InstallDependencyTask{dependency}
 }
 
-func (t *InstallDependencyTask) Dependencies(invokedName string) []string {
+func (t *InstallDependencyTask) Dependencies(string) []string {
 	return []string{}
 }
 
