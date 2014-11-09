@@ -1,9 +1,9 @@
-package gobot
+package grobot
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/fgrosse/gobot/log"
+	"github.com/fgrosse/grobot/log"
 	"io/ioutil"
 )
 

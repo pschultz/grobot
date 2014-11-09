@@ -2,8 +2,8 @@ package gomock
 
 import (
 	"fmt"
-	"github.com/fgrosse/gobot"
-	"github.com/fgrosse/gobot/log"
+	"github.com/fgrosse/grobot"
+	"github.com/fgrosse/grobot/log"
 	"path"
 	"regexp"
 )
@@ -71,7 +71,7 @@ func (t *BuildMockFileTask) Invoke(invokedName string) (bool, error) {
 		command = fmt.Sprintf("%s -package %s", command, t.conf.MockPackage)
 	}
 
-	return true, gobot.Execute(command)
+	return true, grobot.Execute(command)
 }
 
 func (t *BuildMockFileTask) getMockSourcePath(invokedName string) (string, error) {

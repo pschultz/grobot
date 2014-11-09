@@ -2,8 +2,8 @@ package generic
 
 import (
 	"fmt"
-	"github.com/fgrosse/gobot"
-	"github.com/fgrosse/gobot/log"
+	"github.com/fgrosse/grobot"
+	"github.com/fgrosse/grobot/log"
 )
 
 type InstallDependencyTask struct {
@@ -27,5 +27,5 @@ func (t *InstallDependencyTask) Invoke(path string) (bool, error) {
 	}
 
 	log.Action("Installing %s", path)
-	return true, gobot.Execute(command)
+	return true, grobot.Execute(command)
 }

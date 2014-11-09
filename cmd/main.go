@@ -3,16 +3,16 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/fgrosse/gobot"
-	"github.com/fgrosse/gobot/log"
+	"github.com/fgrosse/grobot"
+	"github.com/fgrosse/grobot/log"
 
-	_ "github.com/fgrosse/gobot/modules/gomock"
+	_ "github.com/fgrosse/grobot/modules/gomock"
 	"os"
 )
 
-const defaultConfigFile = "gobot.json"
+const defaultConfigFile = "grobot.json"
 
-var debug = flag.Bool("debug", false, "only useful in gobot development")
+var debug = flag.Bool("debug", false, "only useful in grobot development")
 var configFile = flag.String("config", defaultConfigFile, "set the used config file")
 var showTasks = flag.Bool("t", false, "Display available tasks with descriptions, then exit.")
 
@@ -22,20 +22,20 @@ func main() {
 		defer panicHandler()
 	} else {
 		log.EnableDebug()
-		log.Debug("Running in gobot debug mode")
+		log.Debug("Running in grobot debug mode")
 	}
 
-	if err := gobot.LoadConfigFromFile(*configFile); err != nil {
+	if err := grobot.LoadConfigFromFile(*configFile); err != nil {
 		log.Fatal(err.Error())
 	}
 
 	if *showTasks {
-		gobot.PrintTasks()
+		grobot.PrintTasks()
 		os.Exit(0)
 	}
 
 	taskName := "mocks" // TODO change this to `default`
-	somethingWasDone, err := gobot.InvokeTask(taskName, 0)
+	somethingWasDone, err := grobot.InvokeTask(taskName, 0)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

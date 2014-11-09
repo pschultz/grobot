@@ -3,13 +3,13 @@ package gomock
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/fgrosse/gobot"
-	"github.com/fgrosse/gobot/log"
-	"github.com/fgrosse/gobot/modules/generic"
+	"github.com/fgrosse/grobot"
+	"github.com/fgrosse/grobot/log"
+	"github.com/fgrosse/grobot/modules/generic"
 )
 
 func init() {
-	gobot.RegisterModule(new(Module))
+	grobot.RegisterModule(new(Module))
 }
 
 type Module struct {
@@ -42,10 +42,10 @@ func (m *Module) LoadConfiguration(config map[string]*json.RawMessage) error {
 
 func (m *Module) registerTasks() {
 	generic.RegisterVendorBin("mockgen", "code.google.com/p/gomock/mockgen")
-	gobot.RegisterTask("mocks", NewAllMocksTask(m.conf))
-	gobot.RegisterTask(m.conf.MockFolder, generic.NewCreateFolderTask())
+	grobot.RegisterTask("mocks", NewAllMocksTask(m.conf))
+	grobot.RegisterTask(m.conf.MockFolder, generic.NewCreateFolderTask())
 
 	genericMockBuildRule := fmt.Sprintf(`^%s/\w+\.go$`, m.conf.MockFolder)
-	gobot.RegisterRule(genericMockBuildRule, NewBuildMockFileTask(m.conf))
+	grobot.RegisterRule(genericMockBuildRule, NewBuildMockFileTask(m.conf))
 
 }

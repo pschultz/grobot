@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestGobot(t *testing.T) {
+func TestGrobot(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Grobot main test suite")
 }

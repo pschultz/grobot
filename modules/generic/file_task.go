@@ -1,23 +1,23 @@
 package generic
 
 import (
-	"github.com/fgrosse/gobot"
-	"github.com/fgrosse/gobot/log"
+	"github.com/fgrosse/grobot"
+	"github.com/fgrosse/grobot/log"
 )
 
 type FileTask struct {
-	creationTask gobot.Task
+	creationTask grobot.Task
 }
 
 type FolderTask struct {
 	FileTask
 }
 
-func NewFileTask(createTask gobot.Task) *FileTask {
+func NewFileTask(createTask grobot.Task) *FileTask {
 	return &FileTask{createTask}
 }
 
-func NewFolderTask(createTask gobot.Task) *FolderTask {
+func NewFolderTask(createTask grobot.Task) *FolderTask {
 	return &FolderTask{FileTask{createTask}}
 }
 
@@ -30,7 +30,7 @@ func (t *FileTask) Dependencies(invokedName string) []string {
 }
 
 func (t *FileTask) Invoke(path string) (bool, error) {
-	exists, _, _, err := gobot.ModificationDate(path)
+	exists, _, _, err := grobot.ModificationDate(path)
 	if err != nil {
 		return false, err
 	}
@@ -50,5 +50,5 @@ func (t *CreateFolderTask) Dependencies(invokedName string) []string {
 }
 
 func (t *CreateFolderTask) Invoke(path string) (bool, error) {
-	return true, gobot.Execute(`mkdir -p "%s"`, path)
+	return true, grobot.Execute(`mkdir -p "%s"`, path)
 }

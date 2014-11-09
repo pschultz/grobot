@@ -1,7 +1,7 @@
 package testAPI
 
 import (
-	"github.com/fgrosse/gobot/tests/mocks"
+	"github.com/fgrosse/grobot/tests/mocks"
 	"time"
 )
 

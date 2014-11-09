@@ -2,13 +2,13 @@ package testAPI
 
 import (
 	"code.google.com/p/gomock/gomock"
-	"github.com/fgrosse/gobot"
-	"github.com/fgrosse/gobot/tests/mocks"
+	"github.com/fgrosse/grobot"
+	"github.com/fgrosse/grobot/tests/mocks"
 )
 
 func AssertTask(name string, mockCtrl *gomock.Controller) *mocks.MockTask {
 	task := mocks.NewMockTask(mockCtrl)
-	gobot.RegisterTask(name, task)
+	grobot.RegisterTask(name, task)
 	task.EXPECT().Invoke(name).Return(true, nil)
 	return task
 }

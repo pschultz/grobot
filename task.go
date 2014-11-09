@@ -1,8 +1,8 @@
-package gobot
+package grobot
 
 import (
 	"fmt"
-	"github.com/fgrosse/gobot/log"
+	"github.com/fgrosse/grobot/log"
 	"regexp"
 )
 

@@ -1,14 +1,14 @@
 package tests
 
 import (
-	. "github.com/fgrosse/gobot/tests/mocks"
-	. "github.com/fgrosse/gobot/tests/testAPI"
+	. "github.com/fgrosse/grobot/tests/mocks"
+	. "github.com/fgrosse/grobot/tests/testAPI"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	"code.google.com/p/gomock/gomock"
-	"github.com/fgrosse/gobot"
-	"github.com/fgrosse/gobot/log"
+	"github.com/fgrosse/grobot"
+	"github.com/fgrosse/grobot/log"
 	"time"
 )
 
@@ -20,14 +20,14 @@ var _ = Describe("Tasks", func() {
 	)
 
 	BeforeEach(func() {
-		gobot.Reset()
+		grobot.Reset()
 		log.EnableDebug()
 		mockCtrl = gomock.NewController(GinkgoT())
 		shell = NewMockShell(mockCtrl)
 		fileSystem = NewMockFileSystem(mockCtrl)
 
-		gobot.ShellProvider = shell
-		gobot.FileSystemProvider = fileSystem
+		grobot.ShellProvider = shell
+		grobot.FileSystemProvider = fileSystem
 	})
 
 	AfterEach(func() {
@@ -37,7 +37,7 @@ var _ = Describe("Tasks", func() {
 	Describe("GetTask", func() {
 		Context("with no registered tasks", func() {
 			It("should return an error", func() {
-				task, err := gobot.GetTask("foo/bar")
+				task, err := grobot.GetTask("foo/bar")
 				Expect(err).To(HaveOccurred())
 				Expect(task).To(BeNil())
 				Expect(err.Error()).To(Equal("Don't know how to build task 'foo/bar'"))
@@ -50,22 +50,22 @@ var _ = Describe("Tasks", func() {
 				task2 = NewMockTask(mockCtrl)
 			)
 			BeforeEach(func() {
-				gobot.RegisterTask("foo/bar", task1)
-				gobot.RegisterTask("test", task2)
+				grobot.RegisterTask("foo/bar", task1)
+				grobot.RegisterTask("test", task2)
 			})
 
 			It("should return the registered task", func() {
-				returnedTask, err := gobot.GetTask("foo/bar")
+				returnedTask, err := grobot.GetTask("foo/bar")
 				Expect(err).NotTo(HaveOccurred())
 				Expect(returnedTask).To(Equal(task1))
 
-				returnedTask, err = gobot.GetTask("test")
+				returnedTask, err = grobot.GetTask("test")
 				Expect(err).NotTo(HaveOccurred())
 				Expect(returnedTask).To(Equal(task2))
 			})
 
 			It("should still return an error if an unkown task is requested", func() {
-				returnedTask, err := gobot.GetTask("blub")
+				returnedTask, err := grobot.GetTask("blub")
 				Expect(err).To(HaveOccurred())
 				Expect(returnedTask).To(BeNil())
 				Expect(err.Error()).To(Equal("Don't know how to build task 'blub'"))
@@ -78,12 +78,12 @@ var _ = Describe("Tasks", func() {
 				task2 = NewMockTask(mockCtrl)
 			)
 			BeforeEach(func() {
-				gobot.RegisterRule(`^foo/\w+\.go$`, task1)
-				gobot.RegisterTask("foo/bar", task2)
+				grobot.RegisterRule(`^foo/\w+\.go$`, task1)
+				grobot.RegisterTask("foo/bar", task2)
 			})
 
 			It("should return the registered task", func() {
-				returnedTask, err := gobot.GetTask("foo/bar.go")
+				returnedTask, err := grobot.GetTask("foo/bar.go")
 				Expect(err).NotTo(HaveOccurred())
 				Expect(returnedTask).To(Equal(task1))
 			})
@@ -94,7 +94,7 @@ var _ = Describe("Tasks", func() {
 		It("should just invoke tasks without any dependencies", func() {
 			AssertFileDoesNotExist("main", fileSystem)
 			AssertLeafDependency("main", mockCtrl)
-			_, err := gobot.InvokeTask("main", 0)
+			_, err := grobot.InvokeTask("main", 0)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
@@ -106,7 +106,7 @@ var _ = Describe("Tasks", func() {
 			AssertLeafDependency("dep2", mockCtrl)
 
 			AssertDependencies(task, "dep1", "dep2")
-			_, err := gobot.InvokeTask("main", 0)
+			_, err := grobot.InvokeTask("main", 0)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
@@ -125,7 +125,7 @@ var _ = Describe("Tasks", func() {
 			AssertDependencies(dep1, "dep1/a", "dep1/b")
 			AssertDependencies(dep2, "dep2/c", "dep2/d")
 
-			_, err := gobot.InvokeTask("main", 0)
+			_, err := grobot.InvokeTask("main", 0)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
@@ -136,7 +136,7 @@ var _ = Describe("Tasks", func() {
 			dep1 := AssertTask("dep1", mockCtrl)
 			dep2 := AssertTask("dep2", mockCtrl)
 			foo := NewMockTask(mockCtrl)
-			gobot.RegisterTask("foo", foo)
+			grobot.RegisterTask("foo", foo)
 			foo.EXPECT().Invoke("foo").Return(true, nil).Times(1)
 			AssertNoDependencies(foo)
 
@@ -144,7 +144,7 @@ var _ = Describe("Tasks", func() {
 			AssertDependencies(dep1, "foo")
 			AssertDependencies(dep2, "foo")
 
-			_, err := gobot.InvokeTask("main", 0)
+			_, err := grobot.InvokeTask("main", 0)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
@@ -155,7 +155,7 @@ var _ = Describe("Tasks", func() {
 			})
 
 			It("should return an error if task has not been registered", func() {
-				_, err := gobot.InvokeTask(path, 0)
+				_, err := grobot.InvokeTask(path, 0)
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(Equal("Don't know how to build task 'foo/bar.go'"))
 			})
@@ -166,19 +166,19 @@ var _ = Describe("Tasks", func() {
 
 				task := NewMockTask(mockCtrl)
 				AssertDependencies(task, "dep1", "dep2")
-				gobot.RegisterTask(path, task)
+				grobot.RegisterTask(path, task)
 
 				dep1 := NewMockTask(mockCtrl)
 				dep2 := NewMockTask(mockCtrl)
-				gobot.RegisterTask("dep1", dep1)
-				gobot.RegisterTask("dep2", dep2)
+				grobot.RegisterTask("dep1", dep1)
+				grobot.RegisterTask("dep2", dep2)
 				AssertNoDependencies(dep1)
 				AssertNoDependencies(dep2)
 				dep1.EXPECT().Invoke("dep1").Return(false, nil)
 				dep2.EXPECT().Invoke("dep2").Return(false, nil)
 
 				task.EXPECT().Invoke(path)
-				_, err := gobot.InvokeTask(path, 0)
+				_, err := grobot.InvokeTask(path, 0)
 				Expect(err).NotTo(HaveOccurred())
 			})
 		})
@@ -190,7 +190,7 @@ var _ = Describe("Tasks", func() {
 			})
 
 			It("should not return an error if task has not been registered", func() {
-				result, err := gobot.InvokeTask(path, 0)
+				result, err := grobot.InvokeTask(path, 0)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(result).To(BeFalse())
 			})
@@ -205,36 +205,36 @@ var _ = Describe("Tasks", func() {
 					AssertFileDoesNotExist("dep2", fileSystem)
 
 					dep1 = NewMockTask(mockCtrl)
-					gobot.RegisterTask("dep1", dep1)
+					grobot.RegisterTask("dep1", dep1)
 					AssertNoDependencies(dep1)
 
 					dep2 = NewMockTask(mockCtrl)
-					gobot.RegisterTask("dep2", dep2)
+					grobot.RegisterTask("dep2", dep2)
 					AssertNoDependencies(dep2)
 				})
 
 				It("should invoke the task if any of the dependencies returns (true, nil) on invoke", func() {
 					task := NewMockTask(mockCtrl)
 					AssertDependencies(task, "dep1", "dep2")
-					gobot.RegisterTask(path, task)
+					grobot.RegisterTask(path, task)
 
 					dep1.EXPECT().Invoke("dep1").Return(false, nil)
 					dep2.EXPECT().Invoke("dep2").Return(true, nil)
 					task.EXPECT().Invoke(path).Return(true, nil)
 
-					_, err := gobot.InvokeTask(path, 0)
+					_, err := grobot.InvokeTask(path, 0)
 					Expect(err).NotTo(HaveOccurred())
 				})
 
 				It("should not invoke the task if none of the dependencies returned (true, nil) on invoke", func() {
 					task := NewMockTask(mockCtrl)
 					AssertDependencies(task, "dep1", "dep2")
-					gobot.RegisterTask(path, task)
+					grobot.RegisterTask(path, task)
 
 					dep1.EXPECT().Invoke("dep1").Return(false, nil)
 					dep2.EXPECT().Invoke("dep2").Return(false, nil)
 
-					_, err := gobot.InvokeTask(path, 0)
+					_, err := grobot.InvokeTask(path, 0)
 					Expect(err).NotTo(HaveOccurred())
 				})
 			})

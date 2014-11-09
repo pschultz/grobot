@@ -1,7 +1,7 @@
 package tests
 
 import (
-	. "github.com/fgrosse/gobot/tests/testAPI"
+	. "github.com/fgrosse/grobot/tests/testAPI"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
