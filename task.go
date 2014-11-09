@@ -55,6 +55,11 @@ func RegisterRule(ruleRegex string, newTask Task) error {
 	return nil
 }
 
+func RegisterFolder(path string) error {
+	task := CreateFolderTask{}
+	return RegisterTask(path, &task)
+}
+
 func GetTask(name string) (Task, error) {
 	if task, taskExists := tasks[name]; taskExists == true {
 		return task, nil
@@ -88,22 +93,22 @@ func InvokeTask(invokedName string, recursionDepth int) (bool, error) {
 		return false, err
 	}
 
+	debugPrefix := ""
+	log.SetDebugIndent(0)
+	if recursionDepth > 0 {
+		log.SetDebugIndent(3 * (recursionDepth - 1))
+		debugPrefix = "┗━ "
+	}
+
 	task, err := GetTask(invokedName)
 	if target.ExistingFile && task == nil {
-		log.Debug(target.targetExistsMessage() + " and no specific task or rule has been defined")
+		log.Debug("%s"+target.targetExistsMessage()+" and no specific task or rule has been defined", debugPrefix)
 		return false, nil
 	}
 
 	if err != nil {
 		// file does not exist and we can not find a task to create it
 		return false, err
-	}
-
-	debugPrefix := ""
-	log.SetDebugIndent(0)
-	if recursionDepth > 0 {
-		log.SetDebugIndent(3 * (recursionDepth - 1))
-		debugPrefix = "┗━ "
 	}
 
 	dependencies := task.Dependencies(invokedName)
@@ -114,17 +119,17 @@ func InvokeTask(invokedName string, recursionDepth int) (bool, error) {
 	}
 
 	log.Debug("%sResolving task [<strong>%s</strong>] => %v", debugPrefix, invokedName, dependencies)
-	someDependencyExecutedOrNewer, err := checkDependencies(target, dependencies, recursionDepth)
+	someDependencyUpdatedOrNewer, err := checkDependencies(target, dependencies, recursionDepth)
 	if err != nil {
 		return false, err
 	}
 
-	if target.ExistingFile && someDependencyExecutedOrNewer == false {
+	if target.ExistingFile && someDependencyUpdatedOrNewer == false {
 		log.Debug("No need to build target [<strong>%s</strong>]", invokedName)
 		return false, nil
 	} else {
 		message := fmt.Sprintf("Invoking task [<strong>%s</strong>] => %T", invokedName, task)
-		if someDependencyExecutedOrNewer {
+		if someDependencyUpdatedOrNewer {
 			message = message + " (dependencies updated or newer)"
 		}
 		log.Debug(message)
@@ -135,75 +140,39 @@ func InvokeTask(invokedName string, recursionDepth int) (bool, error) {
 func checkDependencies(target *Target, dependencies []string, recursionDepth int) (bool, error) {
 	log.SetDebugIndent(3 * recursionDepth)
 
-	someDependencyExecutedOrNewer := false
+	someDependencyUpdatedOrNewer := false
 	for _, dependency := range dependencies {
 		depInfo, err := TargetInfo(dependency)
-		if depInfo.ExistingFile && depInfo.ModificationTime.After(target.ModificationTime) { // TODO what if target is no file?
+		if target.ExistingFile && depInfo.ExistingFile && depInfo.ModificationTime.After(target.ModificationTime) {
 			log.Debug("Dependency [<strong>%s</strong>] is newer than [<strong>%s</strong>] so that needs to be rebuild", dependency, target.Name)
-			someDependencyExecutedOrNewer = true
+			someDependencyUpdatedOrNewer = true
 		}
 
-		dependencyExecuted, err := checkDependency(dependency, recursionDepth)
+		dependencyUpdated, err := checkDependency(depInfo, recursionDepth)
 		if err != nil {
 			return false, err
 		}
-		if dependencyExecuted {
-			log.Debug("Dependency [<strong>%s</strong>] has been executed so [<strong>%s</strong>] needs to be rebuild", dependency, target.Name)
-			someDependencyExecutedOrNewer = true
+		if dependencyUpdated {
+			log.Debug("Dependency [<strong>%s</strong>] has been updated so [<strong>%s</strong>] needs to be rebuild", dependency, target.Name)
+			someDependencyUpdatedOrNewer = true
 		}
 	}
 
 	log.SetDebugIndent(3 * recursionDepth)
-	return someDependencyExecutedOrNewer, nil
+	return someDependencyUpdatedOrNewer, nil
 }
 
-func checkDependency(depPath string, recursionDepth int) (bool, error) {
-	if _, alreadyInvoked := resolvedDependencies[depPath]; alreadyInvoked == true {
-		log.Debug("Skipping dependency [<strong>%s</strong>] (already resolved)", depPath)
+func checkDependency(dependency *Target, recursionDepth int) (bool, error) {
+	if _, alreadyInvoked := resolvedDependencies[dependency.Name]; alreadyInvoked == true {
+		log.Debug("Skipping dependency [<strong>%s</strong>] (already resolved)", dependency.Name)
 		return false, nil
 	}
 
-	return InvokeTask(depPath, recursionDepth+1)
-	/*
-		// only invoke target if dep is not existent file or dep is newer than target
-		depFileExists, depIsDir, depModDate, err := TargetInfo(dependency)
-		if err != nil {
-			return false, err
+	if dependency.ExistingFile {
+		if depTask, _ := GetTask(dependency.Name); depTask != nil && len(depTask.Dependencies(dependency.Name)) == 0 {
+			log.Debug("Skipping dependency [<strong>%s</strong>] (%s exists and has no sub dependencies)", dependency.Name, dependency.Typ())
+			return false, nil
 		}
-
-		if depFileExists {
-			nrOfSubDependencies := 0
-			depTask, err := GetTask(dependency)
-			if err == nil {
-				nrOfSubDependencies = len(depTask.Dependencies(dependency))
-			}
-
-			depType := "File"
-			if depIsDir {
-				depType = "Folder"
-			}
-			debugMessage := fmt.Sprintf("%s [<strong>%s</strong>] does already exist", depType, dependency)
-			if nrOfSubDependencies > 0 {
-				debugMessage = fmt.Sprintf("%s but has own dependencies to check", debugMessage)
-				log.Debug(debugMessage)
-				invokeThisTask, err = InvokeTask(dependency, recursionDepth+1)
-				if err != nil {
-					return false, err
-				}
-			} else if targetIsExistentFile {
-				if depModDate.After(targetModDate) {
-					debugMessage = fmt.Sprintf("%s but is newer than [<strong>%s</strong>]", debugMessage, invokedName)
-					invokeThisTask = true
-				} else {
-					debugMessage = fmt.Sprintf("%s and is older than [<strong>%s</strong>]", debugMessage, invokedName)
-				}
-				log.Debug(debugMessage)
-			}
-		} else {
-			invokeThisTask, err = InvokeTask(dependency, recursionDepth+1)
-			if err != nil {
-				return false, err
-			}
-		}*/
-	return false, nil
+	}
+	return InvokeTask(dependency.Name, recursionDepth+1)
 }

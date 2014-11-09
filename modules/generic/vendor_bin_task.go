@@ -10,8 +10,8 @@ type VendorBinTask struct {
 	sourcePath string
 }
 
-func NewVendorBinTask(sourcePath string) *FileTask {
-	return NewFileTask(&VendorBinTask{"vendor/src/" + sourcePath})
+func NewVendorBinTask(sourcePath string) *VendorBinTask {
+	return &VendorBinTask{"vendor/src/" + sourcePath}
 }
 
 func (t *VendorBinTask) Dependencies(invokedName string) []string {

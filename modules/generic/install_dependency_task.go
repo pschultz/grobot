@@ -10,8 +10,8 @@ type InstallDependencyTask struct {
 	dependency string
 }
 
-func NewInstallDependencyTask(dependency string) *FolderTask {
-	return NewFolderTask(&InstallDependencyTask{dependency})
+func NewInstallDependencyTask(dependency string) *InstallDependencyTask {
+	return &InstallDependencyTask{dependency}
 }
 
 func (t *InstallDependencyTask) Dependencies(invokedName string) []string {

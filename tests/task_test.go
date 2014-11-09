@@ -252,6 +252,18 @@ var _ = Describe("Tasks", func() {
 					_, err := grobot.InvokeTask(path, 0)
 					Expect(err).NotTo(HaveOccurred())
 				})
+
+				It("should not invoke the dependency if dep has no sub dependencies and there is already a file for that dependency", func() {
+					task := NewMockTask(mockCtrl)
+					grobot.RegisterTask(path, task)
+
+					AssertDependencies(task, "dep3")
+					AssertLeafDependency("dep3", mockCtrl)
+					AssertFileExists("dep3", time.Now().Add(-100*time.Hour), fileSystem)
+
+					_, err := grobot.InvokeTask(path, 0)
+					Expect(err).NotTo(HaveOccurred())
+				})
 			})
 		})
 	})

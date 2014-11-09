@@ -31,6 +31,13 @@ func (t *Target) targetExistsMessage() string {
 	return fmt.Sprintf("%s [<strong>%s</strong>] does already exist", fileType, t.Name)
 }
 
+func (t *Target) Typ() string {
+	if t.IsDir {
+		return "folder"
+	}
+	return "file"
+}
+
 func TargetInfo(path string) (*Target, error) {
 	targetInfo, err := FileSystemProvider.TargetInfo(path)
 	if err != nil {

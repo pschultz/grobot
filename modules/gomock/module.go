@@ -43,7 +43,7 @@ func (m *Module) LoadConfiguration(config map[string]*json.RawMessage) error {
 func (m *Module) registerTasks() {
 	generic.RegisterVendorBin("mockgen", "code.google.com/p/gomock/mockgen")
 	grobot.RegisterTask("mocks", NewAllMocksTask(m.conf))
-	grobot.RegisterTask(m.conf.MockFolder, generic.NewCreateFolderTask())
+	grobot.RegisterFolder(m.conf.MockFolder)
 
 	genericMockBuildRule := fmt.Sprintf(`^%s/\w+\.go$`, m.conf.MockFolder)
 	grobot.RegisterRule(genericMockBuildRule, NewBuildMockFileTask(m.conf))
