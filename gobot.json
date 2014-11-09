@@ -1,6 +1,7 @@
 {
     "gomock": {
-        "mock-folder": "tests/mocks",
+        "folder": "tests/mocks",
+        "package": "mocks",
         "mocks": [
             "tests/fixtures/mock_source1.go",
             "tests/fixtures/mock_source2.go"

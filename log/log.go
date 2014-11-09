@@ -16,18 +16,22 @@ const grayColor = "\x1b[90m"
 const lightGrayColor = "\x1b[37m"
 
 var isDebug = false
+var debugIndent int
+var currentColor = defaultStyle
 
 func EnableDebug() {
 	isDebug = true
 }
 
 func Print(format string, args ...interface{}) {
+	format = strings.Replace(format, "<strong>", boldStyle, -1)
+	format = strings.Replace(format, "</strong>", defaultStyle+currentColor, -1)
 	fmt.Printf(format+"\n", args...)
 }
 
 func Debug(format string, args ...interface{}) {
 	if isDebug {
-		coloredOutputLn("[DEBUG] "+format, grayColor, args...)
+		coloredOutputLn("[DEBUG] "+strings.Repeat(" ", debugIndent)+format, grayColor, args...)
 	}
 }
 
@@ -53,7 +57,9 @@ func coloredOutput(format, color string, args ...interface{}) {
 }
 
 func coloredOutputLn(format, color string, args ...interface{}) {
-	fmt.Printf(color+format+defaultStyle+"\n", args...)
+	currentColor = color
+	Print(color+format+defaultStyle, args...)
+	currentColor = defaultStyle
 }
 
 func AskBool(question string, args ...interface{}) bool {
@@ -73,4 +79,8 @@ func AskBool(question string, args ...interface{}) bool {
 	}
 
 	return input == "y"
+}
+
+func SetDebugIndent(n int) {
+	debugIndent = n
 }

@@ -19,13 +19,9 @@ $vendor_bins = {
 }
 
 $mocks = {
-    'http_handler.go' => {},
-    "#{$go_common}/http/interface.go" => {
-        mock_file_name: 'http_client_mock.go'
-    },
-    "#{$go_common}/poi/poi_client.go" => {
-        imports: '.=go.classmarkets.com/go-common/poi'
-    }
+    'shell.go' => {},
+    'task.go' => {},
+    'file_system.go' => {}
 }
 
 task :default => :test

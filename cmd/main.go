@@ -35,7 +35,7 @@ func main() {
 	}
 
 	taskName := "mocks" // TODO change this to `default`
-	if err := gobot.InvokeTask(taskName); err != nil {
+	if _, err := gobot.InvokeTask(taskName, 0); err != nil {
 		log.Fatal(err.Error())
 	}
 }

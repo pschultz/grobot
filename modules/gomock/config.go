@@ -1,6 +1,7 @@
 package gomock
 
 type Configuration struct {
-	MockFolder string   "mock-folder"
-	Mocks      []string "mocks"
+	MockFolder  string   `json:"folder"`
+	MockPackage string   `json:"package"`
+	Mocks       []string `json:"mocks"`
 }

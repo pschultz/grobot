@@ -1,4 +1,4 @@
-package tasks
+package tests
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestGobotTasks(t *testing.T) {
+func TestGobot(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Gobot tasks test suite")
+	RunSpecs(t, "Grobot main test suite")
 }

@@ -14,18 +14,18 @@ func NewInstallDependencyTask(dependency string) *FolderTask {
 	return NewFolderTask(&InstallDependencyTask{dependency})
 }
 
-func (t *InstallDependencyTask) Dependencies() []string {
+func (t *InstallDependencyTask) Dependencies(invokedName string) []string {
 	return []string{}
 }
 
-func (t *InstallDependencyTask) Invoke(path string) error {
+func (t *InstallDependencyTask) Invoke(path string) (bool, error) {
+	path = stripVendorSource(path)
 	log.Print("The dependency %s is not installed in your GOPATH.", path)
 	command := "go get " + path
 	if log.AskBool("Do you want me to run %s ? [Yn] ", command) == false {
-		return fmt.Errorf("User canceled task execution")
+		return false, fmt.Errorf("User canceled task execution")
 	}
 
 	log.Action("Installing %s", path)
-	gobot.Shell("echo world")
-	return nil
+	return true, gobot.Shell(command)
 }

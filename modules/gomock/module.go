@@ -34,14 +34,18 @@ func (m *Module) LoadConfiguration(config map[string]*json.RawMessage) error {
 	}
 
 	m.conf = newConfig
+	log.Debug("Using mock folder '%s'", m.conf.MockFolder)
 
 	m.registerTasks()
 	return nil
 }
 
 func (m *Module) registerTasks() {
-	//return RegisterTask(name, NewFolderTask(newTask))
-	gobot.RegisterTask("vendor/bin/mockgen", generic.NewVendorBinTask("code.google.com/p/gomock/mockgen"))
-	gobot.RegisterTask("vendor/src/code.google.com/p/gomock/mockgen", generic.NewInstallDependencyTask("code.google.com/p/gomock/mockgen"))
-	gobot.RegisterTask("mocks", new(MocksTask))
+	generic.RegisterVendorBin("mockgen", "code.google.com/p/gomock/mockgen")
+	gobot.RegisterTask("mocks", NewAllMocksTask(m.conf))
+	gobot.RegisterTask(m.conf.MockFolder, generic.NewCreateFolderTask())
+
+	genericMockBuildRule := fmt.Sprintf(`^%s/\w+\.go$`, m.conf.MockFolder)
+	gobot.RegisterRule(genericMockBuildRule, NewBuildMockFileTask(m.conf))
+
 }
