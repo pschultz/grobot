@@ -25,7 +25,6 @@ var _ = Describe("Tasks", func() {
 		mockCtrl = gomock.NewController(GinkgoT())
 		shell = NewMockShell(mockCtrl)
 		fileSystem = NewMockFileSystem(mockCtrl)
-
 		grobot.ShellProvider = shell
 		grobot.FileSystemProvider = fileSystem
 	})
@@ -186,7 +185,7 @@ var _ = Describe("Tasks", func() {
 		Context("target is an existent file", func() {
 			path := "foo/bar.go"
 			BeforeEach(func() {
-				AssertFileExists(path, time.Now(), fileSystem)
+				AssertFileExists(path, time.Now().Add(-2*time.Hour), fileSystem)
 			})
 
 			It("should not return an error if task has not been registered", func() {
@@ -233,6 +232,22 @@ var _ = Describe("Tasks", func() {
 
 					dep1.EXPECT().Invoke("dep1").Return(false, nil)
 					dep2.EXPECT().Invoke("dep2").Return(false, nil)
+
+					_, err := grobot.InvokeTask(path, 0)
+					Expect(err).NotTo(HaveOccurred())
+				})
+
+				It("should rebuild the target if one of the dependencies is newer than the target even if no dependcy for updated", func() {
+					task := NewMockTask(mockCtrl)
+					AssertDependencies(task, "dep1", "dep2", "dep3")
+					grobot.RegisterTask(path, task)
+
+					AssertFileExists("dep3", time.Now(), fileSystem)
+					AssertLeafDependency("dep3", mockCtrl)
+
+					dep1.EXPECT().Invoke("dep1").Return(false, nil)
+					dep2.EXPECT().Invoke("dep2").Return(false, nil)
+					task.EXPECT().Invoke(path).Return(true, nil)
 
 					_, err := grobot.InvokeTask(path, 0)
 					Expect(err).NotTo(HaveOccurred())

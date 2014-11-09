@@ -12,7 +12,7 @@ import (
 
 const defaultConfigFile = "grobot.json"
 
-var debug = flag.Bool("debug", false, "only useful in grobot development")
+var debug = flag.Bool("debug", false, "show a lot more debug information on the tasks")
 var configFile = flag.String("config", defaultConfigFile, "set the used config file")
 var showTasks = flag.Bool("t", false, "Display available tasks with descriptions, then exit.")
 
