@@ -22,7 +22,7 @@ func (t *InstallDependencyTask) Invoke(path string) (bool, error) {
 	path = stripVendorSource(path)
 	log.Print("The dependency %s is not installed in your GOPATH.", path)
 	command := "go get " + path
-	if log.AskBool("Do you want me to run %s ? [Yn] ", command) == false {
+	if log.AskBool("Do you want me to run %s ?", command) == false {
 		return false, fmt.Errorf("User canceled task execution")
 	}
 

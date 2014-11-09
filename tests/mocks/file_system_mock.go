@@ -4,8 +4,8 @@
 package mocks
 
 import (
-	time "time"
 	gomock "code.google.com/p/gomock/gomock"
+	. "github.com/fgrosse/grobot"
 )
 
 // Mock of FileSystem interface
@@ -29,15 +29,13 @@ func (_m *MockFileSystem) EXPECT() *_MockFileSystemRecorder {
 	return _m.recorder
 }
 
-func (_m *MockFileSystem) ModificationDate(path string) (bool, bool, time.Time, error) {
-	ret := _m.ctrl.Call(_m, "ModificationDate", path)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(bool)
-	ret2, _ := ret[2].(time.Time)
-	ret3, _ := ret[3].(error)
-	return ret0, ret1, ret2, ret3
+func (_m *MockFileSystem) TargetInfo(path string) (*Target, error) {
+	ret := _m.ctrl.Call(_m, "TargetInfo", path)
+	ret0, _ := ret[0].(*Target)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
-func (_mr *_MockFileSystemRecorder) ModificationDate(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "ModificationDate", arg0)
+func (_mr *_MockFileSystemRecorder) TargetInfo(arg0 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "TargetInfo", arg0)
 }

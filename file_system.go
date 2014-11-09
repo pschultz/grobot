@@ -11,28 +11,47 @@ func init() {
 }
 
 type FileSystem interface {
-	ModificationDate(path string) (bool, bool, time.Time, error)
+	TargetInfo(path string) (*Target, error)
 }
 
 var FileSystemProvider FileSystem
 
-func ModificationDate(path string) (bool, bool, time.Time, error) {
-	exists, isDir, modTime, err := FileSystemProvider.ModificationDate(path)
+type Target struct {
+	Name             string
+	ExistingFile     bool
+	IsDir            bool
+	ModificationTime time.Time
+}
+
+func (t *Target) targetExistsMessage() string {
+	fileType := "File"
+	if t.IsDir {
+		fileType = "Folder"
+	}
+	return fmt.Sprintf("%s [<strong>%s</strong>] does already exist", fileType, t.Name)
+}
+
+func TargetInfo(path string) (*Target, error) {
+	targetInfo, err := FileSystemProvider.TargetInfo(path)
 	if err != nil {
 		err = fmt.Errorf("Could not determine whether or not a file or folder exists : %s", err.Error())
 	}
-	return exists, isDir, modTime, err
+	if targetInfo == nil {
+		return nil, fmt.Errorf("Internal error: FileSystemProvider must not return nil")
+	}
+	targetInfo.Name = path
+	return targetInfo, err
 }
 
 type RealFileSystem struct{}
 
-func (f *RealFileSystem) ModificationDate(path string) (bool, bool, time.Time, error) {
+func (f *RealFileSystem) TargetInfo(path string) (*Target, error) {
 	fileInfo, err := os.Stat(path)
 	if err == nil {
-		return true, fileInfo.IsDir(), fileInfo.ModTime(), nil
+		return &Target{ExistingFile: true, IsDir: fileInfo.IsDir(), ModificationTime: fileInfo.ModTime()}, nil
 	}
 	if os.IsNotExist(err) {
-		return false, false, time.Time{}, nil
+		return &Target{ExistingFile: false}, nil
 	}
-	return false, false, time.Time{}, err
+	return &Target{ExistingFile: false}, err
 }

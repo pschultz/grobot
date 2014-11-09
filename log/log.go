@@ -45,11 +45,11 @@ func Error(format string, args ...interface{}) {
 }
 
 func Action(format string, args ...interface{}) {
-	coloredOutputLn(format, yellowColor, args...)
+	coloredOutputLn("➤ "+format, yellowColor, args...)
 }
 
 func Shell(format string, args ...interface{}) {
-	coloredOutputLn("$ "+format, lightGrayColor+boldStyle, args...)
+	coloredOutputLn(boldStyle+"$ "+defaultStyle+format, lightGrayColor, args...)
 }
 
 func coloredOutput(format, color string, args ...interface{}) {
@@ -65,7 +65,7 @@ func coloredOutputLn(format, color string, args ...interface{}) {
 func AskBool(question string, args ...interface{}) bool {
 	var input string
 	for input != "y" && input != "n" {
-		coloredOutput(question, yellowColor, args...)
+		coloredOutput(question+" [Yn] ", yellowColor, args...)
 		_, err := fmt.Scanf("%s", &input)
 		if err != nil {
 			panic(fmt.Errorf("Could not read input : %s", err.Error()))

@@ -30,12 +30,12 @@ func (t *FileTask) Dependencies(invokedName string) []string {
 }
 
 func (t *FileTask) Invoke(path string) (bool, error) {
-	exists, _, _, err := grobot.ModificationDate(path)
+	targetInfo, err := grobot.TargetInfo(path)
 	if err != nil {
 		return false, err
 	}
 
-	if exists {
+	if targetInfo.ExistingFile {
 		log.Debug("Nothing to do: file or folder '%s' does already exist", path)
 		return false, nil
 	}

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/fgrosse/grobot/log"
 	"regexp"
-	"time"
 )
 
 var (
@@ -84,14 +83,14 @@ func PrintTasks() {
 
 func InvokeTask(invokedName string, recursionDepth int) (bool, error) {
 	resolvedDependencies[invokedName] = true
-	targetIsExistentFile, targetIsDir, targetModDate, err := ModificationDate(invokedName)
+	target, err := TargetInfo(invokedName)
 	if err != nil {
 		return false, err
 	}
 
 	task, err := GetTask(invokedName)
-	if targetIsExistentFile && task == nil {
-		log.Debug(targetExistsMessage(invokedName, targetIsDir) + " and no specific task or rule has been defined")
+	if target.ExistingFile && task == nil {
+		log.Debug(target.targetExistsMessage() + " and no specific task or rule has been defined")
 		return false, nil
 	}
 
@@ -115,12 +114,12 @@ func InvokeTask(invokedName string, recursionDepth int) (bool, error) {
 	}
 
 	log.Debug("%sResolving task [<strong>%s</strong>] => %v", debugPrefix, invokedName, dependencies)
-	someDependencyExecutedOrNewer, err := checkDependencies(invokedName, targetModDate, dependencies, recursionDepth)
+	someDependencyExecutedOrNewer, err := checkDependencies(target, dependencies, recursionDepth)
 	if err != nil {
 		return false, err
 	}
 
-	if targetIsExistentFile && someDependencyExecutedOrNewer == false {
+	if target.ExistingFile && someDependencyExecutedOrNewer == false {
 		log.Debug("No need to build target [<strong>%s</strong>]", invokedName)
 		return false, nil
 	} else {
@@ -133,14 +132,14 @@ func InvokeTask(invokedName string, recursionDepth int) (bool, error) {
 	}
 }
 
-func checkDependencies(targetName string, targetModDate time.Time, dependencies []string, recursionDepth int) (bool, error) {
+func checkDependencies(target *Target, dependencies []string, recursionDepth int) (bool, error) {
 	log.SetDebugIndent(3 * recursionDepth)
 
 	someDependencyExecutedOrNewer := false
 	for _, dependency := range dependencies {
-		depIsExistentFile, _, depModDate, err := ModificationDate(dependency)
-		if depIsExistentFile && depModDate.After(targetModDate) {
-			log.Debug("Dependency [<strong>%s</strong>] is newer than [<strong>%s</strong>] so that needs to be rebuild", dependency, targetName)
+		depInfo, err := TargetInfo(dependency)
+		if depInfo.ExistingFile && depInfo.ModificationTime.After(target.ModificationTime) { // TODO what if target is no file?
+			log.Debug("Dependency [<strong>%s</strong>] is newer than [<strong>%s</strong>] so that needs to be rebuild", dependency, target.Name)
 			someDependencyExecutedOrNewer = true
 		}
 
@@ -149,7 +148,7 @@ func checkDependencies(targetName string, targetModDate time.Time, dependencies 
 			return false, err
 		}
 		if dependencyExecuted {
-			log.Debug("Dependency [<strong>%s</strong>] has been executed so [<strong>%s</strong>] needs to be rebuild", dependency, targetName)
+			log.Debug("Dependency [<strong>%s</strong>] has been executed so [<strong>%s</strong>] needs to be rebuild", dependency, target.Name)
 			someDependencyExecutedOrNewer = true
 		}
 	}
@@ -167,7 +166,7 @@ func checkDependency(depPath string, recursionDepth int) (bool, error) {
 	return InvokeTask(depPath, recursionDepth+1)
 	/*
 		// only invoke target if dep is not existent file or dep is newer than target
-		depFileExists, depIsDir, depModDate, err := ModificationDate(dependency)
+		depFileExists, depIsDir, depModDate, err := TargetInfo(dependency)
 		if err != nil {
 			return false, err
 		}
@@ -207,12 +206,4 @@ func checkDependency(depPath string, recursionDepth int) (bool, error) {
 			}
 		}*/
 	return false, nil
-}
-
-func targetExistsMessage(taskName string, isDir bool) string {
-	fileType := "File"
-	if isDir {
-		fileType = "Folder"
-	}
-	return fmt.Sprintf("%s [<strong>%s</strong>] does already exist", fileType, taskName)
 }

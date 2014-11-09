@@ -21,7 +21,9 @@ $vendor_bins = {
 $mocks = {
     'shell.go' => {},
     'task.go' => {},
-    'file_system.go' => {}
+    'file_system.go' => {
+        imports: '.=github.com/fgrosse/grobot'
+    }
 }
 
 task :default => :test
