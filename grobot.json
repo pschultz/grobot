@@ -9,5 +9,8 @@
                 "imports": ".=github.com/fgrosse/grobot"
             }
         }
+    },
+    "ginkgo": {
+        "folder": "tests"
     }
 }

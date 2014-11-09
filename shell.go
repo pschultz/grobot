@@ -37,8 +37,8 @@ func (s *SystemShell) Execute(cmdLine string) error {
 	}
 
 	cmd := exec.Command(cmdParts[0], cmdParts[1:]...)
-	cmd.Stdout = &ShellWriter{os.Stdout}
-	cmd.Stderr = &ShellWriter{os.Stderr}
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
 	return cmd.Run()
 }

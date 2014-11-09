@@ -6,6 +6,7 @@ import (
 	"github.com/fgrosse/grobot"
 	"github.com/fgrosse/grobot/log"
 
+	_ "github.com/fgrosse/grobot/modules/ginkgo"
 	_ "github.com/fgrosse/grobot/modules/gomock"
 	"os"
 )
@@ -34,7 +35,11 @@ func main() {
 		os.Exit(0)
 	}
 
-	taskName := "mocks" // TODO change this to `default`
+	taskName := "default"
+	if len(os.Args) > 1 {
+		taskName = os.Args[len(os.Args)-1]
+	}
+
 	somethingWasDone, err := grobot.InvokeTask(taskName, 0)
 	if err != nil {
 		log.Fatal(err.Error())
