@@ -1,6 +1,7 @@
 package testAPI
 
 import (
+	"code.google.com/p/gomock/gomock"
 	"github.com/fgrosse/grobot"
 	"github.com/fgrosse/grobot/log"
 	"github.com/fgrosse/grobot/tests/mocks"
@@ -23,4 +24,9 @@ func AssertNoFiles(fileSystem *mocks.MockFileSystem, args ...string) {
 	for _, arg := range args {
 		AssertFileDoesNotExist(arg, fileSystem)
 	}
+}
+
+func AssertEmptyFileSystem(fileSystem *mocks.MockFileSystem) {
+	targetInfo := grobot.Target{ExistingFile: false}
+	fileSystem.EXPECT().TargetInfo(gomock.Any()).Return(&targetInfo, nil).AnyTimes()
 }

@@ -8,7 +8,6 @@ import (
 
 	"code.google.com/p/gomock/gomock"
 	"github.com/fgrosse/grobot"
-	"github.com/fgrosse/grobot/log"
 	"time"
 )
 
@@ -20,13 +19,8 @@ var _ = Describe("Tasks", func() {
 	)
 
 	BeforeEach(func() {
-		grobot.Reset()
-		log.EnableDebug()
 		mockCtrl = gomock.NewController(GinkgoT())
-		shell = NewMockShell(mockCtrl)
-		fileSystem = NewMockFileSystem(mockCtrl)
-		grobot.ShellProvider = shell
-		grobot.FileSystemProvider = fileSystem
+		shell, fileSystem = SetupTestEnvironment(mockCtrl)
 	})
 
 	AfterEach(func() {
@@ -100,7 +94,7 @@ var _ = Describe("Tasks", func() {
 		It("should invoke all dependencies of a task", func() {
 			AssertNoFiles(fileSystem, "main", "dep1", "dep2")
 
-			task := AssertTask("main", mockCtrl)
+			task := AssertTaskIsInvoked("main", mockCtrl)
 			AssertLeafDependency("dep1", mockCtrl)
 			AssertLeafDependency("dep2", mockCtrl)
 
@@ -112,9 +106,9 @@ var _ = Describe("Tasks", func() {
 		It("should invoke all dependencies of the dependencies", func() {
 			AssertNoFiles(fileSystem, "main", "dep1", "dep2", "dep1/a", "dep1/b", "dep2/c", "dep2/d")
 
-			task := AssertTask("main", mockCtrl)
-			dep1 := AssertTask("dep1", mockCtrl)
-			dep2 := AssertTask("dep2", mockCtrl)
+			task := AssertTaskIsInvoked("main", mockCtrl)
+			dep1 := AssertTaskIsInvoked("dep1", mockCtrl)
+			dep2 := AssertTaskIsInvoked("dep2", mockCtrl)
 			AssertLeafDependency("dep1/a", mockCtrl)
 			AssertLeafDependency("dep1/b", mockCtrl)
 			AssertLeafDependency("dep2/c", mockCtrl)
@@ -131,9 +125,9 @@ var _ = Describe("Tasks", func() {
 		It("should invoke each target only once", func() {
 			AssertNoFiles(fileSystem, "main", "foo", "dep1", "dep2")
 
-			task := AssertTask("main", mockCtrl)
-			dep1 := AssertTask("dep1", mockCtrl)
-			dep2 := AssertTask("dep2", mockCtrl)
+			task := AssertTaskIsInvoked("main", mockCtrl)
+			dep1 := AssertTaskIsInvoked("dep1", mockCtrl)
+			dep2 := AssertTaskIsInvoked("dep2", mockCtrl)
 			foo := NewMockTask(mockCtrl)
 			grobot.RegisterTask("foo", foo)
 			foo.EXPECT().Invoke("foo").Return(true, nil).Times(1)

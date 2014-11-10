@@ -18,7 +18,7 @@ type Shell interface {
 	Execute(cmdLine string) error
 }
 
-// ShellProvider is mainly there to enable grobot users to exchange the used shell
+// ShellProvider is mainly there to enable bot users to exchange the used shell
 // This is especially useful in grobots own tests to mock the shell
 var ShellProvider Shell
 

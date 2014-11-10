@@ -26,12 +26,13 @@ type Describable interface {
 	Description() string
 }
 
-// Reset is used to make grobot forget about all registered tasks and rules
+// Reset is used to make bot forget about all registered tasks and rules
 // This is probably only useful in tests
 func Reset() {
 	tasks = map[string]Task{}
 	rules = map[*regexp.Regexp]Task{}
 	resolvedDependencies = map[string]bool{}
+	hooks = map[string][]*TaskHook{}
 }
 
 func RegisterTask(name string, newTask Task) error {
@@ -87,6 +88,8 @@ func PrintTasks() {
 }
 
 func InvokeTask(invokedName string, recursionDepth int) (bool, error) {
+	checkHooks(HookBefore, invokedName, recursionDepth)
+
 	resolvedDependencies[invokedName] = true
 	target, err := TargetInfo(invokedName)
 	if err != nil {
@@ -111,30 +114,39 @@ func InvokeTask(invokedName string, recursionDepth int) (bool, error) {
 		return false, err
 	}
 
+	someDependencyUpdatedOrNewer := false
 	dependencies := task.Dependencies(invokedName)
 	if len(dependencies) == 0 {
 		log.Debug("%sInvoking task [<strong>%s</strong>] with %T", debugPrefix, invokedName, task)
 		log.SetDebugIndent(3 * recursionDepth)
-		return task.Invoke(invokedName)
+	} else {
+		log.Debug("%sResolving task [<strong>%s</strong>] => %v", debugPrefix, invokedName, dependencies)
+		someDependencyUpdatedOrNewer, err = checkDependencies(target, dependencies, recursionDepth)
+		if err != nil {
+			return false, err
+		}
 	}
 
-	log.Debug("%sResolving task [<strong>%s</strong>] => %v", debugPrefix, invokedName, dependencies)
-	someDependencyUpdatedOrNewer, err := checkDependencies(target, dependencies, recursionDepth)
-	if err != nil {
-		return false, err
-	}
-
+	targetWasUpdated := false
 	if target.ExistingFile && someDependencyUpdatedOrNewer == false {
 		log.Debug("No need to build target [<strong>%s</strong>]", invokedName)
-		return false, nil
 	} else {
 		message := fmt.Sprintf("Invoking task [<strong>%s</strong>] => %T", invokedName, task)
 		if someDependencyUpdatedOrNewer {
 			message = message + " (dependencies updated or newer)"
 		}
 		log.Debug(message)
-		return task.Invoke(invokedName)
+		targetWasUpdated, err = task.Invoke(invokedName)
+		if err != nil {
+			return false, err
+		}
 	}
+
+	hooksUpdated, err := checkHooks(HookAfter, invokedName, recursionDepth)
+	if err != nil {
+		return false, err
+	}
+	return targetWasUpdated || hooksUpdated, nil
 }
 
 func checkDependencies(target *Target, dependencies []string, recursionDepth int) (bool, error) {
