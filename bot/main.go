@@ -48,7 +48,7 @@ func main() {
 	if somethingWasDone == false {
 		log.Action("Task [<strong>%s</strong>] is up to date", taskName)
 	} else {
-		log.Action("Task [<strong>%s</strong>] has been updated", taskName)
+		log.Debug("Task [<strong>%s</strong>] has been updated", taskName)
 	}
 }
 
