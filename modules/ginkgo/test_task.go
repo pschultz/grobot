@@ -18,7 +18,7 @@ func (t *TestTask) Description() string {
 }
 
 func (t *TestTask) Dependencies(name string) []string {
-	return []string{}
+	return []string{"vendor/bin/ginkgo"}
 }
 
 func (t *TestTask) Invoke(invokedName string) (bool, error) {
