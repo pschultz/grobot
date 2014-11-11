@@ -2,13 +2,13 @@ package grobot
 
 import "github.com/fgrosse/grobot/log"
 
-type CreateFolderTask struct{}
+type CreateDirectoryTask struct{}
 
-func (t *CreateFolderTask) Dependencies(string) []string {
+func (t *CreateDirectoryTask) Dependencies(string) []string {
 	return []string{}
 }
 
-func (t *CreateFolderTask) Invoke(path string) (bool, error) {
-	log.Action("Creating folder %s", path)
+func (t *CreateDirectoryTask) Invoke(path string) (bool, error) {
+	log.Action("Creating directory %s", path)
 	return true, Execute(`mkdir -p "%s"`, path)
 }

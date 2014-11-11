@@ -45,7 +45,7 @@ func (m *Module) registerTasks() {
 	grobot.RegisterTaskHook(grobot.HookBefore, grobot.StandardTaskTest, "mocks")
 
 	generic.RegisterVendorBin("mockgen", "code.google.com/p/gomock/mockgen")
-	grobot.RegisterFolder(m.conf.MockFolder)
+	grobot.RegisterDirectory(m.conf.MockFolder)
 
 	genericMockBuildRule := fmt.Sprintf(`^%s/\w+_mock\.go$`, m.conf.MockFolder)
 	grobot.RegisterRule(genericMockBuildRule, NewBuildMockFileTask(m.conf))

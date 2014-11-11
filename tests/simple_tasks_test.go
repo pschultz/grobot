@@ -25,15 +25,15 @@ var _ = Describe("Simple Tasks", func() {
 		mockCtrl.Finish()
 	})
 
-	Describe("CreateFolderTask", func() {
+	Describe("CreateDirectoryTask", func() {
 		It("should have no dependencies", func() {
-			task := &grobot.CreateFolderTask{}
+			task := &grobot.CreateDirectoryTask{}
 			dependencies := task.Dependencies("anything")
 			Expect(dependencies).To(BeEmpty())
 		})
 
 		It("should create the folder if invoked", func() {
-			task := &grobot.CreateFolderTask{}
+			task := &grobot.CreateDirectoryTask{}
 			shell.EXPECT().Execute(`mkdir -p "some/folder/bla"`).Return(nil)
 			result, err := task.Invoke("some/folder/bla")
 			Expect(err).NotTo(HaveOccurred())
@@ -42,10 +42,10 @@ var _ = Describe("Simple Tasks", func() {
 
 		It("should give a convenience method to regoister folders", func() {
 			path := "some/folder/bla"
-			grobot.RegisterFolder(path)
+			grobot.RegisterDirectory(path)
 			task, err := grobot.GetTask(path)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(task).To(BeAssignableToTypeOf(&grobot.CreateFolderTask{}))
+			Expect(task).To(BeAssignableToTypeOf(&grobot.CreateDirectoryTask{}))
 		})
 	})
 })

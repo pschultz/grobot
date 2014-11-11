@@ -61,8 +61,8 @@ func RegisterRule(ruleRegex string, newTask Task) error {
 	return nil
 }
 
-func RegisterFolder(path string) error {
-	task := CreateFolderTask{}
+func RegisterDirectory(path string) error {
+	task := CreateDirectoryTask{}
 	return RegisterTask(path, &task)
 }
 

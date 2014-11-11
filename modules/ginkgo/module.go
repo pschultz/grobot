@@ -46,6 +46,6 @@ func (m *Module) registerTasks() {
 	// go get github.com/onsi/gomega
 	grobot.RegisterTask(grobot.StandardTaskTest, NewTestTask(m.conf))
 	if m.conf.TestFolder != "" {
-		grobot.RegisterFolder(m.conf.TestFolder)
+		grobot.RegisterDirectory(m.conf.TestFolder)
 	}
 }
