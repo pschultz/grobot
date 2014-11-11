@@ -15,9 +15,15 @@ func NewAllMocksTask(conf Configuration) *AllMocksTask {
 	task.mockFiles = make([]string, len(conf.Mocks))
 	fileEnding, _ := regexp.Compile(`\.go$`)
 	i := 0
-	for mockSource, _ := range conf.Mocks {
-		mockFile := path.Base(mockSource)
-		mockFile = fileEnding.ReplaceAllString(mockFile, "_mock.go")
+	for mockSource, mockConf := range conf.Mocks {
+		var mockFile string
+		if mockConf.MockFileName != "" {
+			mockFile = mockConf.MockFileName
+		} else {
+			mockFile = path.Base(mockSource)
+			mockFile = fileEnding.ReplaceAllString(mockFile, "_mock.go")
+		}
+
 		task.mockFiles[i] = fmt.Sprintf("%s/%s", conf.MockFolder, mockFile)
 		i++
 	}

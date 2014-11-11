@@ -57,11 +57,15 @@ func (t *BuildMockFileTask) Invoke(targetName string) (bool, error) {
 
 func (t *BuildMockFileTask) getMockSourcePath(invokedName string) (string, error) {
 	fileEnding, _ := regexp.Compile(`_mock\.go$`)
-	baseName := path.Base(invokedName)
-	baseName = fileEnding.ReplaceAllString(baseName, ".go")
 
-	for sourceName, _ := range t.conf.Mocks {
-		if path.Base(sourceName) == baseName {
+	baseName := path.Base(invokedName)
+	baseNameWithoutMockExtension := fileEnding.ReplaceAllString(baseName, ".go")
+
+	for sourceName, mockConf := range t.conf.Mocks {
+		if mockConf.MockFileName == baseName {
+			return sourceName, nil
+		}
+		if path.Base(sourceName) == baseNameWithoutMockExtension {
 			return sourceName, nil
 		}
 	}

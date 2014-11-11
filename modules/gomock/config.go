@@ -7,5 +7,6 @@ type Configuration struct {
 }
 
 type MockConfig struct {
-	Imports string `json:"imports"`
+	Imports      string `json:"imports"`
+	MockFileName string `json:"mock_file_name"`
 }
