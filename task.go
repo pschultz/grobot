@@ -6,6 +6,11 @@ import (
 	"regexp"
 )
 
+const (
+	StandardTaskDefault = "default"
+	StandardTaskTest    = "test"
+)
+
 var (
 	tasks                = map[string]Task{}
 	rules                = map[*regexp.Regexp]Task{}
@@ -40,7 +45,7 @@ func RegisterTask(name string, newTask Task) error {
 		return fmt.Errorf("Module error: Task '%s' has already been registered", name)
 	}
 
-	log.Debug("Registering [%s] as %T", name, newTask)
+	log.Debug("Registering task [<strong>%s</strong>] as %T", name, newTask)
 	tasks[name] = newTask
 	return nil
 }
@@ -51,7 +56,7 @@ func RegisterRule(ruleRegex string, newTask Task) error {
 		return fmt.Errorf("Could not compile rule regex: %s", err.Error())
 	}
 
-	log.Debug("Registering rule /%s/ as %T", ruleRegex, newTask)
+	log.Debug("Registering rule [<strong>/%s/</strong>] as %T", ruleRegex, newTask)
 	rules[rule] = newTask
 	return nil
 }

@@ -44,7 +44,7 @@ func (m *Module) registerTasks() {
 	generic.RegisterVendorBin("ginkgo", "github.com/onsi/ginkgo/ginkgo")
 	// TODO we probably also want gomega dependency
 	// go get github.com/onsi/gomega
-	grobot.RegisterTask("test", NewTestTask(m.conf))
+	grobot.RegisterTask(grobot.StandardTaskTest, NewTestTask(m.conf))
 	if m.conf.TestFolder != "" {
 		grobot.RegisterFolder(m.conf.TestFolder)
 	}

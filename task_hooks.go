@@ -46,7 +46,7 @@ func checkHooks(hookType HookType, invokedName string, recursionDepth int) (bool
 			return false, nil
 		}
 
-		log.Debug("Invoking hook %s for target [<strong>%s</strong>]", hook.Typ, invokedName)
+		log.Debug("Invoking %s hook [<strong>%s</strong>] for target [<strong>%s</strong>]", hook, hook.SubTask, invokedName)
 		wasUpdated, err := InvokeTask(hook.SubTask, recursionDepth+1)
 		if err != nil {
 			return false, err

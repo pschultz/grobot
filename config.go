@@ -21,7 +21,7 @@ func LoadConfigFromFile(confFilePath string) error {
 	}
 
 	for _, module := range modules {
-		log.Debug("Loading configuration for module [%s]", module.Name())
+		log.Debug("Loading configuration for module [<strong>%s</strong>]", module.Name())
 		err = module.LoadConfiguration(config)
 		if err != nil {
 			log.Error("Error whileloading module %s : %s", module.Name(), err.Error())
