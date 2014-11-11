@@ -84,3 +84,10 @@ func AskBool(question string, args ...interface{}) bool {
 func SetDebugIndent(n int) {
 	debugIndent = n
 }
+
+func Pluralize(s string, n int) string {
+	if n > 1 {
+		s = s + "s"
+	}
+	return s
+}

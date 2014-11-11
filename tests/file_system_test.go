@@ -7,6 +7,7 @@ import (
 
 	"code.google.com/p/gomock/gomock"
 	"errors"
+	"fmt"
 	"github.com/fgrosse/grobot"
 	"time"
 )
@@ -28,29 +29,49 @@ var _ = Describe("FileSystem", func() {
 		mockCtrl.Finish()
 	})
 
-	It("should ask the FileSystemProvider if a file exists and for the modification date", func() {
-		fileSystem.EXPECT().TargetInfo(somePath).Return(&grobot.Target{}, nil)
-		_, err := grobot.TargetInfo(somePath)
-		Expect(err).NotTo(HaveOccurred())
+	Describe("TargetInfo", func() {
+		It("should ask the FileSystemProvider if a file exists and for the modification date", func() {
+			fileSystem.EXPECT().TargetInfo(somePath).Return(&grobot.Target{}, nil)
+			_, err := grobot.TargetInfo(somePath)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("should return the result from the file system provider", func() {
+			expectedTargetInfo := &grobot.Target{
+				ExistingFile:     true,
+				IsDir:            true,
+				ModificationTime: time.Now(),
+			}
+			fileSystem.EXPECT().TargetInfo(somePath).Return(expectedTargetInfo, nil)
+			targetInfo, err := grobot.TargetInfo(somePath)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(targetInfo).To(Equal(expectedTargetInfo))
+		})
+
+		It("should return errors from the FileSystemProvider", func() {
+			expectedErr := errors.New("oh noes!!!")
+			fileSystem.EXPECT().TargetInfo(somePath).Return(&grobot.Target{}, expectedErr)
+			_, err := grobot.TargetInfo(somePath)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("Could not determine whether or not a file or folder exists : oh noes!!!"))
+		})
 	})
 
-	It("should return the result of the shell provider", func() {
-		expectedTargetInfo := &grobot.Target{
-			ExistingFile:     true,
-			IsDir:            true,
-			ModificationTime: time.Now(),
-		}
-		fileSystem.EXPECT().TargetInfo(somePath).Return(expectedTargetInfo, nil)
-		targetInfo, err := grobot.TargetInfo(somePath)
-		Expect(err).NotTo(HaveOccurred())
-		Expect(targetInfo).To(Equal(expectedTargetInfo))
-	})
+	Describe("ReadFile", func() {
+		It("should use the FileSystemProvider to read files", func() {
+			expectedContent := []byte("123456")
+			fileSystem.EXPECT().ReadFile(somePath).Return(expectedContent, nil)
+			returnedContent, err := grobot.ReadFile(somePath)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(returnedContent).To(Equal(expectedContent))
+		})
 
-	It("should return errors from the shell provider", func() {
-		expectedErr := errors.New("oh noes!!!")
-		fileSystem.EXPECT().TargetInfo(somePath).Return(&grobot.Target{}, expectedErr)
-		_, err := grobot.TargetInfo(somePath)
-		Expect(err).To(HaveOccurred())
-		Expect(err.Error()).To(Equal("Could not determine whether or not a file or folder exists : oh noes!!!"))
+		It("should return errors from the shell provider", func() {
+			expectedErr := errors.New("oh noes!!!")
+			fileSystem.EXPECT().ReadFile(somePath).Return([]byte("123456"), expectedErr)
+			_, err := grobot.ReadFile(somePath)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal(fmt.Sprintf(`Could not read file "%s" : oh noes!!!`, somePath)))
+		})
 	})
 })

@@ -2,6 +2,7 @@ package grobot
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"time"
 )
@@ -12,6 +13,7 @@ func init() {
 
 type FileSystem interface {
 	TargetInfo(path string) (*Target, error)
+	ReadFile(path string) ([]byte, error)
 }
 
 var FileSystemProvider FileSystem
@@ -50,6 +52,14 @@ func TargetInfo(path string) (*Target, error) {
 	return targetInfo, err
 }
 
+func ReadFile(path string) ([]byte, error) {
+	data, err := FileSystemProvider.ReadFile(path)
+	if err != nil {
+		return data, fmt.Errorf(`Could not read file "%s" : %s`, path, err.Error())
+	}
+	return data, nil
+}
+
 type RealFileSystem struct{}
 
 func (f *RealFileSystem) TargetInfo(path string) (*Target, error) {
@@ -61,4 +71,8 @@ func (f *RealFileSystem) TargetInfo(path string) (*Target, error) {
 		return &Target{ExistingFile: false}, nil
 	}
 	return &Target{ExistingFile: false}, err
+}
+
+func (f *RealFileSystem) ReadFile(path string) ([]byte, error) {
+	return ioutil.ReadFile(path)
 }
