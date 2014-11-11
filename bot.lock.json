@@ -1,0 +1,11 @@
+{
+  "packages": [
+    {
+      "name": "github.com/fgrosse/phpasn1",
+      "source": {
+        "type": "git",
+        "reference": "21f34783f1bbb00912fabadbccff64318132c2d9"
+      }
+    }
+  ]
+}

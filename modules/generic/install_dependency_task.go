@@ -27,5 +27,6 @@ func (t *InstallDependencyTask) Invoke(path string) (bool, error) {
 	}
 
 	log.Action("Installing %s", path)
-	return true, grobot.Execute(command)
+	grobot.Execute(command)
+	return true, nil
 }

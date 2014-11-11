@@ -37,3 +37,11 @@ func (_m *MockShell) Execute(cmdLine string) error {
 func (_mr *_MockShellRecorder) Execute(arg0 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "Execute", arg0)
 }
+
+func (_m *MockShell) SetWorkingDirectory(workingDirectory string) {
+	_m.ctrl.Call(_m, "SetWorkingDirectory", workingDirectory)
+}
+
+func (_mr *_MockShellRecorder) SetWorkingDirectory(arg0 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "SetWorkingDirectory", arg0)
+}

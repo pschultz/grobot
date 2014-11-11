@@ -6,8 +6,11 @@ import (
 	"github.com/fgrosse/grobot"
 	"github.com/fgrosse/grobot/log"
 
+	// import modules
+	_ "github.com/fgrosse/grobot/modules/dependency"
 	_ "github.com/fgrosse/grobot/modules/ginkgo"
 	_ "github.com/fgrosse/grobot/modules/gomock"
+
 	"os"
 )
 

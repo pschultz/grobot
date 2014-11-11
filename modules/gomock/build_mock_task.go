@@ -52,7 +52,8 @@ func (t *BuildMockFileTask) Invoke(targetName string) (bool, error) {
 		command = fmt.Sprintf(`%s -imports "%s"`, command, mockConfig.Imports)
 	}
 
-	return true, grobot.Execute(command)
+	grobot.Execute(command)
+	return true, nil
 }
 
 func (t *BuildMockFileTask) getMockSourcePath(invokedName string) (string, error) {

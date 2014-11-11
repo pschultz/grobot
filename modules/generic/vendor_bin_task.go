@@ -21,7 +21,8 @@ func (t *VendorBinTask) Dependencies(invokedName string) []string {
 func (t *VendorBinTask) Invoke(name string) (bool, error) {
 	sourcePath := stripVendorSource(t.sourcePath)
 	log.Action("Compiling %s..", name)
-	return true, grobot.Execute(`go build -o "%s" "%s"`, name, sourcePath)
+	grobot.Execute(`go build -o "%s" "%s"`, name, sourcePath)
+	return true, nil
 }
 
 func stripVendorSource(path string) string {

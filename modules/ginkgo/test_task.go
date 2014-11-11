@@ -27,6 +27,6 @@ func (t *TestTask) Invoke(invokedName string) (bool, error) {
 		command = fmt.Sprintf(`%s "%s"`, command, t.conf.TestFolder)
 	}
 
-	err := grobot.Execute(command)
-	return true, err
+	grobot.Execute(command)
+	return true, nil
 }

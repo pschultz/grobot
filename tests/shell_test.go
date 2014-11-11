@@ -31,10 +31,17 @@ var _ = Describe("Shell", func() {
 		grobot.Execute("foo %sblup %d", "bar", 3)
 	})
 
-	It("should return the result of the shell provider", func() {
+	It("should panic if the shell provider returned an error", func() {
 		expectedErr := errors.New("hey there")
 		shell.EXPECT().Execute("foo barblup 3").Return(expectedErr)
-		err := grobot.Execute("foo %sblup %d", "bar", 3)
-		Expect(err).To(Equal(expectedErr))
+
+		defer func() {
+			r := recover()
+			Expect(r).NotTo(BeNil())
+			caughtErr := r.(error)
+			Expect(caughtErr).To(Equal(expectedErr))
+		}()
+
+		grobot.Execute("foo %sblup %d", "bar", 3)
 	})
 })

@@ -62,7 +62,10 @@ func installDependencies(lockFile *LockFile) (bool, error) {
 		return false, nil
 	}
 
-	log.Action("Installing %d %s", len(lockFile.Packages), log.Pluralize("package", len(lockFile.Packages)))
+	if len(lockFile.Packages) > 1 {
+		log.Action("Installing %d packages", len(lockFile.Packages))
+	}
+
 	for _, p := range lockFile.Packages {
 		if err := installPackage(p); err != nil {
 			return false, err
@@ -76,8 +79,12 @@ func installPackage(p *PackageDefinition) error {
 		return fmt.Errorf("bot install does currently only support git over HTTPS. Please come back later or do a pull request :)")
 	}
 
+	log.Action("Installing package %s..", p.Name)
 	gitURL := fmt.Sprintf("https://%s", p.Name)
 	grobot.Execute("git clone %s vendor/src/%s", gitURL, p.Name)
-	grobot.Execute("cd vendor/src/%s && git checkout %s", p.Name, p.Source.Reference)
+	grobot.SetWorkingDirectory("vendor/src/%s", p.Name)
+	grobot.Execute("git checkout %s --quiet", p.Source.Reference)
+	grobot.ResetWorkingDirectory()
+
 	return nil
 }

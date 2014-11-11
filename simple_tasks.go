@@ -10,5 +10,6 @@ func (t *CreateDirectoryTask) Dependencies(string) []string {
 
 func (t *CreateDirectoryTask) Invoke(path string) (bool, error) {
 	log.Action("Creating directory %s", path)
-	return true, Execute(`mkdir -p "%s"`, path)
+	Execute(`mkdir -p "%s"`, path)
+	return true, nil
 }

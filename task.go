@@ -122,7 +122,6 @@ func InvokeTask(invokedName string, recursionDepth int) (bool, error) {
 	someDependencyUpdatedOrNewer := false
 	dependencies := task.Dependencies(invokedName)
 	if len(dependencies) == 0 {
-		log.Debug("%sInvoking task [<strong>%s</strong>] with %T", debugPrefix, invokedName, task)
 		log.SetDebugIndent(3 * recursionDepth)
 	} else {
 		log.Debug("%sResolving task [<strong>%s</strong>] => %v", debugPrefix, invokedName, dependencies)
@@ -136,7 +135,7 @@ func InvokeTask(invokedName string, recursionDepth int) (bool, error) {
 	if target.ExistingFile && someDependencyUpdatedOrNewer == false {
 		log.Debug("No need to build target [<strong>%s</strong>]", invokedName)
 	} else {
-		message := fmt.Sprintf("Invoking task [<strong>%s</strong>] => %T", invokedName, task)
+		message := fmt.Sprintf("%sInvoking task [<strong>%s</strong>] with %T", debugPrefix, invokedName, task)
 		if someDependencyUpdatedOrNewer {
 			message = message + " (dependencies updated or newer)"
 		}

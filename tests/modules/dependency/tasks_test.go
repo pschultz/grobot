@@ -48,7 +48,9 @@ var _ = Describe("Tasks", func() {
 
 			gomock.InOrder(
 				shell.EXPECT().Execute("git clone https://github.com/onsi/ginkgo vendor/src/github.com/onsi/ginkgo"),
-				shell.EXPECT().Execute("cd vendor/src/github.com/onsi/ginkgo && git checkout 7891f8646dc62f4e32642ba332bbe7cf0097d8c5"),
+				shell.EXPECT().SetWorkingDirectory("vendor/src/github.com/onsi/ginkgo"),
+				shell.EXPECT().Execute("git checkout 7891f8646dc62f4e32642ba332bbe7cf0097d8c5 --quiet"),
+				shell.EXPECT().SetWorkingDirectory(""),
 			)
 
 			task := dependency.NewInstallTask()
