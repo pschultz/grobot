@@ -7,7 +7,6 @@ import (
 	. "github.com/onsi/gomega"
 
 	"code.google.com/p/gomock/gomock"
-	"fmt"
 	"github.com/fgrosse/grobot/modules/dependency"
 )
 
@@ -54,9 +53,9 @@ var _ = Describe("Install tasks", func() {
 
 		It("should install dependencies from "+dependency.LockFileName, func() {
 			gomock.InOrder(
-				shell.EXPECT().Execute("git clone https://github.com/onsi/ginkgo "+vendorDir, false),
+				shell.EXPECT().Execute("git clone https://github.com/onsi/ginkgo "+vendorDir, true),
 				shell.EXPECT().SetWorkingDirectory(vendorDir),
-				shell.EXPECT().Execute("git checkout "+cvsRev+" --quiet", false),
+				shell.EXPECT().Execute("git checkout "+cvsRev+" --quiet", true),
 				shell.EXPECT().SetWorkingDirectory(""),
 			)
 
@@ -80,18 +79,6 @@ var _ = Describe("Install tasks", func() {
 			task := dependency.NewInstallTask()
 			_, err := task.Invoke("install")
 			Expect(err).NotTo(HaveOccurred())
-		})
-
-		It("should report an error if the checkout version does not equal the requested version", func() {
-			gomock.InOrder(
-				shell.EXPECT().SetWorkingDirectory(vendorDir),
-				shell.EXPECT().Execute("git rev-parse HEAD", true).Return("123456", nil),
-				shell.EXPECT().SetWorkingDirectory(""),
-			)
-			task := dependency.NewInstallTask()
-			_, err := task.Invoke("install")
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal(fmt.Sprintf("Repository at %s is not at the required version %s", vendorDir, cvsRev)))
 		})
 	})
 })
