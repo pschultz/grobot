@@ -84,7 +84,7 @@ func (s *SystemShell) Execute(cmdLine string, silent bool) (string, error) {
 		cmdParts[i] = strings.Trim(part, `"`)
 	}
 
-	var stdOut, stdErr *ShellWriter
+	var stdOut, stdErr *shellWriter
 	if silent {
 		stdOut = newShellWriter(ioutil.Discard)
 		stdErr = newShellWriter(ioutil.Discard)
@@ -103,16 +103,16 @@ func (s *SystemShell) Execute(cmdLine string, silent bool) (string, error) {
 	return stdOut.Output(), err
 }
 
-type ShellWriter struct {
+type shellWriter struct {
 	output io.Writer
 	buf    *bytes.Buffer
 }
 
-func newShellWriter(output io.Writer) *ShellWriter {
-	return &ShellWriter{output, &bytes.Buffer{}}
+func newShellWriter(output io.Writer) *shellWriter {
+	return &shellWriter{output, &bytes.Buffer{}}
 }
 
-func (w *ShellWriter) Write(p []byte) (int, error) {
+func (w *shellWriter) Write(p []byte) (int, error) {
 	n, err := w.buf.Write(p)
 	if err != nil {
 		return n, err
@@ -130,6 +130,6 @@ func (w *ShellWriter) Write(p []byte) (int, error) {
 	return n, err
 }
 
-func (w *ShellWriter) Output() string {
+func (w *shellWriter) Output() string {
 	return w.buf.String()
 }
