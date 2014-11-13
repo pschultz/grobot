@@ -7,6 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"code.google.com/p/gomock/gomock"
+	"fmt"
 	"github.com/fgrosse/grobot/modules/dependency"
 )
 
@@ -22,7 +23,7 @@ var _ = Describe("Install tasks", func() {
 		fileSystem      *MockFileSystem
 		lockFileContent string
 		vendorDir       = "vendor/src/github.com/onsi/ginkgo"
-		cvsRef          = "7891f8646dc62f4e32642ba332bbe7cf0097d8c5"
+		cvsRev          = "7891f8646dc62f4e32642ba332bbe7cf0097d8c5"
 	)
 
 	BeforeEach(func() {
@@ -34,7 +35,7 @@ var _ = Describe("Install tasks", func() {
 					"name": "github.com/onsi/ginkgo",
 					"source": {
 						"type": "git",
-						"reference": "` + cvsRef + `"
+						"reference": "` + cvsRev + `"
 					}
 				}
 			]
@@ -55,7 +56,7 @@ var _ = Describe("Install tasks", func() {
 			gomock.InOrder(
 				shell.EXPECT().Execute("git clone https://github.com/onsi/ginkgo "+vendorDir, false),
 				shell.EXPECT().SetWorkingDirectory(vendorDir),
-				shell.EXPECT().Execute("git checkout "+cvsRef+" --quiet", false),
+				shell.EXPECT().Execute("git checkout "+cvsRev+" --quiet", false),
 				shell.EXPECT().SetWorkingDirectory(""),
 			)
 
@@ -73,12 +74,24 @@ var _ = Describe("Install tasks", func() {
 		It("should not do anything if the checkout version equals the requested version", func() {
 			gomock.InOrder(
 				shell.EXPECT().SetWorkingDirectory(vendorDir),
-				shell.EXPECT().Execute("git rev-parse HEAD", true).Return(cvsRef, nil),
+				shell.EXPECT().Execute("git rev-parse HEAD", true).Return(cvsRev, nil),
 				shell.EXPECT().SetWorkingDirectory(""),
 			)
 			task := dependency.NewInstallTask()
 			_, err := task.Invoke("install")
 			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("should report an error if the checkout version does not equal the requested version", func() {
+			gomock.InOrder(
+				shell.EXPECT().SetWorkingDirectory(vendorDir),
+				shell.EXPECT().Execute("git rev-parse HEAD", true).Return("123456", nil),
+				shell.EXPECT().SetWorkingDirectory(""),
+			)
+			task := dependency.NewInstallTask()
+			_, err := task.Invoke("install")
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal(fmt.Sprintf("Repository at %s is not at the required version %s", vendorDir, cvsRev)))
 		})
 	})
 })
