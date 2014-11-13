@@ -25,7 +25,7 @@ func main() {
 	if *debug == false {
 		defer panicHandler()
 	} else {
-		log.EnableDebug()
+		grobot.EnableDebugMode()
 		log.Debug("Running in grobot debug mode")
 	}
 

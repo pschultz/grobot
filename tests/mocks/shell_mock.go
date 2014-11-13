@@ -28,14 +28,15 @@ func (_m *MockShell) EXPECT() *_MockShellRecorder {
 	return _m.recorder
 }
 
-func (_m *MockShell) Execute(cmdLine string) error {
-	ret := _m.ctrl.Call(_m, "Execute", cmdLine)
-	ret0, _ := ret[0].(error)
-	return ret0
+func (_m *MockShell) Execute(cmdLine string, silent bool) (string, error) {
+	ret := _m.ctrl.Call(_m, "Execute", cmdLine, silent)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
-func (_mr *_MockShellRecorder) Execute(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "Execute", arg0)
+func (_mr *_MockShellRecorder) Execute(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "Execute", arg0, arg1)
 }
 
 func (_m *MockShell) SetWorkingDirectory(workingDirectory string) {

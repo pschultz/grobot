@@ -38,6 +38,7 @@ func Reset() {
 	rules = map[*regexp.Regexp]Task{}
 	resolvedDependencies = map[string]bool{}
 	hooks = map[string][]*TaskHook{}
+	isDebug = false
 }
 
 func RegisterTask(name string, newTask Task) error {
@@ -96,10 +97,7 @@ func InvokeTask(invokedName string, recursionDepth int) (bool, error) {
 	checkHooks(HookBefore, invokedName, recursionDepth)
 
 	resolvedDependencies[invokedName] = true
-	target, err := TargetInfo(invokedName)
-	if err != nil {
-		return false, err
-	}
+	target := TargetInfo(invokedName)
 
 	debugPrefix := ""
 	log.SetDebugIndent(0)
@@ -158,7 +156,7 @@ func checkDependencies(target *Target, dependencies []string, recursionDepth int
 
 	someDependencyUpdatedOrNewer := false
 	for _, dependency := range dependencies {
-		depInfo, err := TargetInfo(dependency)
+		depInfo := TargetInfo(dependency)
 		if target.ExistingFile && depInfo.ExistingFile && depInfo.ModificationTime.After(target.ModificationTime) {
 			log.Debug("Dependency [<strong>%s</strong>] is newer than [<strong>%s</strong>] so that needs to be rebuild", dependency, target.Name)
 			someDependencyUpdatedOrNewer = true

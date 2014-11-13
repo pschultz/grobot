@@ -31,10 +31,7 @@ func (t *InstallTask) Invoke(string) (bool, error) {
 }
 
 func loadLockFile() (*LockFile, error) {
-	targetInfo, err := grobot.TargetInfo(LockFileName)
-	if err != nil {
-		return nil, fmt.Errorf("Error while reading meta data of dependency lock file: %s", err.Error())
-	}
+	targetInfo := grobot.TargetInfo(LockFileName)
 
 	if targetInfo.ExistingFile == false {
 		log.Print("Lock file [<strong>%s</strong>] does not exist", LockFileName)
@@ -45,6 +42,9 @@ func loadLockFile() (*LockFile, error) {
 	data, err := grobot.ReadFile(LockFileName)
 	if err != nil {
 		return nil, fmt.Errorf("Error while reading dependency lock file: %s", err.Error())
+	}
+	if len(data) == 0 {
+		return nil, fmt.Errorf("Error while reading dependency lock file: Empty file")
 	}
 
 	var lockFile LockFile
@@ -75,16 +75,37 @@ func installDependencies(lockFile *LockFile) (bool, error) {
 }
 
 func installPackage(p *PackageDefinition) error {
+	log.Action("Installing package %s", p.Name)
 	if p.Source.Typ != "git" {
 		return fmt.Errorf("bot install does currently only support git over HTTPS. Please come back later or do a pull request :)")
 	}
 
-	log.Action("Installing package %s..", p.Name)
-	gitURL := fmt.Sprintf("https://%s", p.Name)
-	grobot.Execute("git clone %s vendor/src/%s", gitURL, p.Name)
-	grobot.SetWorkingDirectory("vendor/src/%s", p.Name)
-	grobot.Execute("git checkout %s --quiet", p.Source.Reference)
-	grobot.ResetWorkingDirectory()
+	vendorDir := fmt.Sprintf("vendor/src/%s", p.Name)
+	targetInfo := grobot.TargetInfo(vendorDir)
+	if targetInfo.ExistingFile {
+		return checkIfPackageHasRequestedVersion(vendorDir, p)
+	} else {
+		gitURL := fmt.Sprintf("https://%s", p.Name)
+		grobot.Execute("git clone %s %s", gitURL, vendorDir)
+		grobot.SetWorkingDirectory(vendorDir)
+		grobot.Execute("git checkout %s --quiet", p.Source.Reference)
+		grobot.ResetWorkingDirectory()
+	}
 
 	return nil
+}
+
+func checkIfPackageHasRequestedVersion(vendorDir string, p *PackageDefinition) (err error) {
+	log.Debug("Directory [<strong>%s</strong>] is already existent", vendorDir)
+
+	grobot.SetWorkingDirectory(vendorDir)
+	cvsRef := grobot.ExecuteSilent("git rev-parse HEAD")
+	if cvsRef == p.Source.Reference {
+		log.Print("  package already up to date (%s)", cvsRef)
+		err = nil
+	} else {
+		err = fmt.Errorf("Repository at %s is not at the required version %s", vendorDir, p.Source.Reference)
+	}
+	grobot.ResetWorkingDirectory()
+	return err
 }

@@ -7,6 +7,17 @@ import (
 	"io/ioutil"
 )
 
+var isDebug = false
+
+func EnableDebugMode() {
+	isDebug = true
+	log.EnableDebug()
+}
+
+func IsDebugMode() bool {
+	return isDebug
+}
+
 func LoadConfigFromFile(confFilePath string) error {
 	log.Debug("Loading configuration from file '%s'", confFilePath)
 	data, err := ioutil.ReadFile(confFilePath)
@@ -28,5 +39,6 @@ func LoadConfigFromFile(confFilePath string) error {
 		}
 		log.Debug("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 	}
+
 	return nil
 }

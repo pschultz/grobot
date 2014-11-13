@@ -34,7 +34,7 @@ var _ = Describe("Simple Tasks", func() {
 
 		It("should create the folder if invoked", func() {
 			task := &grobot.CreateDirectoryTask{}
-			shell.EXPECT().Execute(`mkdir -p "some/folder/bla"`).Return(nil)
+			shell.EXPECT().Execute(`mkdir -p "some/folder/bla"`, false)
 			result, err := task.Invoke("some/folder/bla")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result).To(BeTrue())

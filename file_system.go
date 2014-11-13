@@ -40,16 +40,17 @@ func (t *Target) Typ() string {
 	return "file"
 }
 
-func TargetInfo(path string) (*Target, error) {
+func TargetInfo(path string) *Target {
 	targetInfo, err := FileSystemProvider.TargetInfo(path)
 	if err != nil {
-		err = fmt.Errorf("Could not determine whether or not a file or folder exists : %s", err.Error())
+		panic(fmt.Errorf("Could not determine whether or not a file or folder exists : %s", err.Error()))
+
 	}
 	if targetInfo == nil {
-		return nil, fmt.Errorf("Internal error: FileSystemProvider must not return nil")
+		panic(fmt.Errorf("Internal error: FileSystemProvider must not return nil"))
 	}
 	targetInfo.Name = path
-	return targetInfo, err
+	return targetInfo
 }
 
 func ReadFile(path string) ([]byte, error) {

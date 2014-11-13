@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/fgrosse/grobot/log"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
@@ -15,7 +16,7 @@ func init() {
 }
 
 type Shell interface {
-	Execute(cmdLine string) error
+	Execute(cmdLine string, silent bool) (string, error)
 	SetWorkingDirectory(workingDirectory string)
 }
 
@@ -44,13 +45,29 @@ func ResetWorkingDirectory() {
 // having to handle each and every error separately
 // Defer some panic handler if you need to recover from the error.
 // Grobots main function will handle the panic if nobody else does it
-func Execute(format string, args ...interface{}) {
+func Execute(format string, args ...interface{}) string {
 	cmdLine := fmt.Sprintf(format, args...)
 	log.Shell(cmdLine)
-	err := ShellProvider.Execute(cmdLine)
+	output, err := ShellProvider.Execute(cmdLine, false)
 	if err != nil {
 		panic(err)
 	}
+	return strings.TrimSpace(output)
+}
+
+// ExecuteSilent does exactly what Execute does but only printing the
+// shell command and output if debug mode is enabled
+func ExecuteSilent(format string, args ...interface{}) string {
+	if isDebug {
+		return Execute(format, args...)
+	}
+
+	cmdLine := fmt.Sprintf(format, args...)
+	output, err := ShellProvider.Execute(cmdLine, true)
+	if err != nil {
+		panic(err)
+	}
+	return strings.TrimSpace(output)
 }
 
 type SystemShell struct {
@@ -61,32 +78,58 @@ func (s *SystemShell) SetWorkingDirectory(workingDirectory string) {
 	s.Dir = workingDirectory
 }
 
-func (s *SystemShell) Execute(cmdLine string) error {
+func (s *SystemShell) Execute(cmdLine string, silent bool) (string, error) {
 	cmdParts := strings.Split(cmdLine, " ")
 	for i, part := range cmdParts {
 		cmdParts[i] = strings.Trim(part, `"`)
 	}
 
+	var stdOut, stdErr *ShellWriter
+	if silent {
+		stdOut = newShellWriter(ioutil.Discard)
+		stdErr = newShellWriter(ioutil.Discard)
+	} else {
+		stdOut = newShellWriter(os.Stdout)
+		stdErr = newShellWriter(os.Stderr)
+	}
+
 	cmd := exec.Command(cmdParts[0], cmdParts[1:]...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = stdOut
+	cmd.Stderr = stdErr
 	cmd.Stdin = os.Stdin
 	cmd.Dir = s.Dir
-	return cmd.Run()
+
+	err := cmd.Run()
+	return stdOut.Output(), err
 }
 
 type ShellWriter struct {
 	output io.Writer
+	buf    *bytes.Buffer
 }
 
-func (w *ShellWriter) Write(p []byte) (n int, err error) {
-	buf := new(bytes.Buffer)
-	buf.WriteString("> ")
-	buf.Write(p)
-	n, err = w.output.Write(buf.Bytes())
+func newShellWriter(output io.Writer) *ShellWriter {
+	return &ShellWriter{output, &bytes.Buffer{}}
+}
+
+func (w *ShellWriter) Write(p []byte) (int, error) {
+	n, err := w.buf.Write(p)
 	if err != nil {
 		return n, err
 	}
-	n = n - 2
-	return
+
+	m, err := w.output.Write(p)
+	if err != nil {
+		return m, err
+	}
+
+	if n != m {
+		return 0, fmt.Errorf("Error while writing shell output to internal buffer: wrote %d bytes to buffer and %d bytes to the output", n, m)
+	}
+
+	return n, err
+}
+
+func (w *ShellWriter) Output() string {
+	return w.buf.String()
 }

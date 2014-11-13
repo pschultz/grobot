@@ -32,8 +32,7 @@ var _ = Describe("FileSystem", func() {
 	Describe("TargetInfo", func() {
 		It("should ask the FileSystemProvider if a file exists and for the modification date", func() {
 			fileSystem.EXPECT().TargetInfo(somePath).Return(&grobot.Target{}, nil)
-			_, err := grobot.TargetInfo(somePath)
-			Expect(err).NotTo(HaveOccurred())
+			grobot.TargetInfo(somePath)
 		})
 
 		It("should return the result from the file system provider", func() {
@@ -43,17 +42,22 @@ var _ = Describe("FileSystem", func() {
 				ModificationTime: time.Now(),
 			}
 			fileSystem.EXPECT().TargetInfo(somePath).Return(expectedTargetInfo, nil)
-			targetInfo, err := grobot.TargetInfo(somePath)
-			Expect(err).NotTo(HaveOccurred())
+			targetInfo := grobot.TargetInfo(somePath)
 			Expect(targetInfo).To(Equal(expectedTargetInfo))
 		})
 
-		It("should return errors from the FileSystemProvider", func() {
+		It("should panic if the FileSystemProvider returns any errors", func() {
 			expectedErr := errors.New("oh noes!!!")
 			fileSystem.EXPECT().TargetInfo(somePath).Return(&grobot.Target{}, expectedErr)
-			_, err := grobot.TargetInfo(somePath)
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal("Could not determine whether or not a file or folder exists : oh noes!!!"))
+
+			defer func() {
+				r := recover()
+				Expect(r).NotTo(BeNil())
+				caughtErr := r.(error)
+				Expect(caughtErr.Error()).To(Equal("Could not determine whether or not a file or folder exists : oh noes!!!"))
+			}()
+
+			grobot.TargetInfo(somePath)
 		})
 	})
 
