@@ -63,7 +63,7 @@ func installDependencies(lockFile *LockFile) (bool, error) {
 	}
 
 	if len(lockFile.Packages) > 1 {
-		log.Action("Checking %d dependencies", len(lockFile.Packages))
+		log.Action("Processing %d dependencies", len(lockFile.Packages))
 	}
 
 	nrOfUpdates := 0
