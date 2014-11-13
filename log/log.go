@@ -24,6 +24,7 @@ func EnableDebug() {
 }
 
 func Print(format string, args ...interface{}) {
+	format = strings.Replace(format, "%S", "[<strong>%s</strong>]", -1)
 	format = strings.Replace(format, "<strong>", boldStyle, -1)
 	format = strings.Replace(format, "</strong>", defaultStyle+currentColor, -1)
 	fmt.Printf(format+"\n", args...)
@@ -46,6 +47,10 @@ func Error(format string, args ...interface{}) {
 
 func Action(format string, args ...interface{}) {
 	coloredOutputLn("➤ "+format, yellowColor, args...)
+}
+
+func ActionMinor(format string, args ...interface{}) {
+	Print("➤ "+format, args...)
 }
 
 func Shell(format string, args ...interface{}) {

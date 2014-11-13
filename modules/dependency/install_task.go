@@ -34,7 +34,7 @@ func loadLockFile() (*LockFile, error) {
 	targetInfo := grobot.TargetInfo(LockFileName)
 
 	if targetInfo.ExistingFile == false {
-		log.Print("Lock file [<strong>%s</strong>] does not exist", LockFileName)
+		log.Print("Lock file %S does not exist", LockFileName)
 		return nil, nil
 	}
 
@@ -58,53 +58,69 @@ func loadLockFile() (*LockFile, error) {
 
 func installDependencies(lockFile *LockFile) (bool, error) {
 	if len(lockFile.Packages) == 0 {
-		log.Print("No packages to install found in [<strong>%s</strong>]", LockFileName)
+		log.Print("No packages to install found in %S", LockFileName)
 		return false, nil
 	}
 
 	if len(lockFile.Packages) > 1 {
-		log.Action("Installing %d packages", len(lockFile.Packages))
+		log.Action("Checking %d dependencies", len(lockFile.Packages))
 	}
 
+	nrOfUpdates := 0
 	for _, p := range lockFile.Packages {
-		if err := installPackage(p); err != nil {
-			return false, err
+		updated, err := installPackage(p)
+		if err != nil {
+			log.Error(err.Error())
+		}
+		if updated == true {
+			nrOfUpdates++
 		}
 	}
-	return true, nil
+
+	switch {
+	case nrOfUpdates == 0:
+		log.Action("No new packages have been installed")
+	case nrOfUpdates == 1:
+		log.Action("One package has been installed")
+	default:
+		log.Action("<strong>%d</strong> packages have been installed", nrOfUpdates)
+	}
+
+	return nrOfUpdates > 0, nil
 }
 
-func installPackage(p *PackageDefinition) error {
-	log.Action("Installing package %s", p.Name)
+func installPackage(p *PackageDefinition) (bool, error) {
 	if p.Source.Typ != "git" {
-		return fmt.Errorf("bot install does currently only support git over HTTPS. Please come back later or do a pull request :)")
+		return false, fmt.Errorf("bot install does currently only support git over HTTPS. Please come back later or do a pull request :)")
 	}
 
 	vendorDir := fmt.Sprintf("vendor/src/%s", p.Name)
+	log.Debug("Trying to install package %S from %s repo version %s into %S", p.Name, p.Source.Typ, p.Source.Reference, vendorDir)
 	targetInfo := grobot.TargetInfo(vendorDir)
 	if targetInfo.ExistingFile {
-		return checkIfPackageHasRequestedVersion(vendorDir, p)
+		return false, checkIfPackageHasRequestedVersion(vendorDir, p)
 	} else {
+		log.Action("Installing package %S ...", p.Name)
 		gitURL := fmt.Sprintf("https://%s", p.Name)
-		grobot.Execute("git clone %s %s", gitURL, vendorDir)
+		grobot.ExecuteSilent("git clone %s %s", gitURL, vendorDir)
 		grobot.SetWorkingDirectory(vendorDir)
-		grobot.Execute("git checkout %s --quiet", p.Source.Reference)
+		grobot.ExecuteSilent("git checkout %s --quiet", p.Source.Reference)
 		grobot.ResetWorkingDirectory()
+		return true, nil
 	}
-
-	return nil
 }
 
 func checkIfPackageHasRequestedVersion(vendorDir string, p *PackageDefinition) (err error) {
-	log.Debug("Directory [<strong>%s</strong>] is already existent", vendorDir)
+	log.Debug("Directory %S does already exist", vendorDir)
+	log.Debug("Checking repository version...")
 
 	grobot.SetWorkingDirectory(vendorDir)
 	cvsRef := grobot.ExecuteSilent("git rev-parse HEAD")
 	if cvsRef == p.Source.Reference {
-		log.Print("  package already up to date (%s)", cvsRef)
+		log.ActionMinor("Package %S already up to date", p.Name)
 		err = nil
 	} else {
-		err = fmt.Errorf("Repository at %s is not at the required version %s", vendorDir, p.Source.Reference)
+		err = fmt.Errorf("Package %s : repository at %s is not at the required version %s", p.Name, vendorDir, p.Source.Reference)
 	}
 	grobot.ResetWorkingDirectory()
 	return err
