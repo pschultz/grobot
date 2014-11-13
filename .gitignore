@@ -1,7 +1,2 @@
-# Project files
 .idea
-
-# Compiled stuff from the vendors code
-vendor/pkg
-vendor/bin
-vendor/**/vendor
+vendor
