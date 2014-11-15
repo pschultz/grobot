@@ -3,7 +3,7 @@ package grobot
 import "net/http"
 
 func init() {
-	HttpClientProvider = &DefaultHttpClient{}
+	HttpClientProvider = &defaultHttpClient{http.DefaultClient}
 }
 
 type HttpClient interface {
@@ -12,11 +12,11 @@ type HttpClient interface {
 
 var HttpClientProvider HttpClient
 
-type DefaultHttpClient struct {
+type defaultHttpClient struct {
 	client *http.Client
 }
 
-func (c *DefaultHttpClient) Send(request *http.Request) (*http.Response, error) {
+func (c *defaultHttpClient) Send(request *http.Request) (*http.Response, error) {
 	return c.client.Do(request)
 }
 
