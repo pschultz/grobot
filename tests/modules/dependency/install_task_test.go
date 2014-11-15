@@ -8,30 +8,27 @@ import (
 
 	"code.google.com/p/gomock/gomock"
 	"github.com/fgrosse/grobot/modules/dependency"
+	"net/http"
 )
-
-/*
- * TODO: for this package
- *       - support HTTP (not only HTTPS)
- */
 
 var _ = Describe("Install tasks", func() {
 	var (
 		mockCtrl        *gomock.Controller
 		shell           *MockShell
 		fileSystem      *MockFileSystem
+		httpClient      *MockHttpClient
 		lockFileContent string
-		vendorDir       = "vendor/src/github.com/onsi/ginkgo"
+		vendorDir       = "vendor/src/foo.bar/fgrosse/test"
 		cvsRev          = "7891f8646dc62f4e32642ba332bbe7cf0097d8c5"
 	)
 
 	BeforeEach(func() {
 		mockCtrl = gomock.NewController(GinkgoT())
-		shell, fileSystem = SetupTestEnvironment(mockCtrl)
+		shell, fileSystem, httpClient = SetupTestEnvironment(mockCtrl)
 		lockFileContent = `{
 			"packages": [
 				{
-					"name": "github.com/onsi/ginkgo",
+					"name": "foo.bar/fgrosse/test",
 					"source": {
 						"type": "git",
 						"reference": "` + cvsRev + `"
@@ -51,9 +48,21 @@ var _ = Describe("Install tasks", func() {
 			AssertFileDoesNotExist(vendorDir, fileSystem)
 		})
 
-		It("should install dependencies from "+dependency.LockFileName, func() {
+		It("should use the go get logic to determine the repository url and checkout the correct version", func() {
+			responseBody := `
+				<!DOCTYPE html>
+				<html>
+					<head>
+						<meta name='go-import' content='foo.bar/fgrosse/test git https://repository.foo.bar/fgrosse/test.git'>
+					</head>
+					<body/>
+				</html>
+			`
+			req1, _ := http.NewRequest("GET", "https://foo.bar/fgrosse/test?go-get=1", nil)
+			httpClient.EXPECT().Send(req1).Return(NewHttpResponse(responseBody), nil)
+
 			gomock.InOrder(
-				shell.EXPECT().Execute("git clone https://github.com/onsi/ginkgo "+vendorDir, true),
+				shell.EXPECT().Execute("git clone https://repository.foo.bar/fgrosse/test.git "+vendorDir, true),
 				shell.EXPECT().SetWorkingDirectory(vendorDir),
 				shell.EXPECT().Execute("git checkout "+cvsRev+" --quiet", true),
 				shell.EXPECT().SetWorkingDirectory(""),

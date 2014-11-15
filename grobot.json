@@ -5,6 +5,7 @@
         "mocks": {
             "shell.go": {},
             "task.go": {},
+            "http.go": {},
             "file_system.go": {
                 "imports": ".=github.com/fgrosse/grobot"
             }

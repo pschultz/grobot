@@ -19,7 +19,7 @@ var _ = Describe("Shell", func() {
 
 	BeforeEach(func() {
 		mockCtrl = gomock.NewController(GinkgoT())
-		shell, _ = SetupTestEnvironment(mockCtrl)
+		shell, _, _ = SetupTestEnvironment(mockCtrl)
 	})
 
 	AfterEach(func() {

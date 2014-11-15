@@ -100,13 +100,7 @@ func installPackage(p *PackageDefinition) (bool, error) {
 	if targetInfo.ExistingFile {
 		return false, checkIfPackageHasRequestedVersion(vendorDir, p)
 	} else {
-		log.Action("Installing package %S ...", p.Name)
-		gitURL := fmt.Sprintf("https://%s", p.Name)
-		grobot.ExecuteSilent("git clone %s %s", gitURL, vendorDir)
-		grobot.SetWorkingDirectory(vendorDir)
-		grobot.ExecuteSilent("git checkout %s --quiet", p.Source.Reference)
-		grobot.ResetWorkingDirectory()
-		return true, nil
+		return true, checkoutPackage(vendorDir, p)
 	}
 }
 
@@ -124,4 +118,20 @@ func checkIfPackageHasRequestedVersion(vendorDir string, p *PackageDefinition) (
 	}
 	grobot.ResetWorkingDirectory()
 	return err
+}
+
+func checkoutPackage(vendorDir string, p *PackageDefinition) (err error) {
+	log.Action("Installing package %S ...", p.Name)
+	log.Debug("Determining repository URL ...")
+	gitURL, err := repoRootForImportDynamic(p.Name)
+	log.Debug("Repository URL for %S is %S", p.Name, gitURL)
+	if err != nil {
+		return err
+	}
+
+	grobot.ExecuteSilent("git clone %s %s", gitURL, vendorDir)
+	grobot.SetWorkingDirectory(vendorDir)
+	grobot.ExecuteSilent("git checkout %s --quiet", p.Source.Reference)
+	grobot.ResetWorkingDirectory()
+	return nil
 }

@@ -7,14 +7,16 @@ import (
 	. "github.com/fgrosse/grobot/tests/mocks"
 )
 
-func SetupTestEnvironment(mockCtrl *gomock.Controller) (shell *MockShell, fileSystem *MockFileSystem) {
+func SetupTestEnvironment(mockCtrl *gomock.Controller) (*MockShell, *MockFileSystem, *MockHttpClient) {
 	grobot.Reset()
 	log.EnableDebug()
-	shell = NewMockShell(mockCtrl)
-	fileSystem = NewMockFileSystem(mockCtrl)
+	shell := NewMockShell(mockCtrl)
+	fileSystem := NewMockFileSystem(mockCtrl)
+	httpClient := NewMockHttpClient(mockCtrl)
 	grobot.ShellProvider = shell
 	grobot.FileSystemProvider = fileSystem
-	return shell, fileSystem
+	grobot.HttpClientProvider = httpClient
+	return shell, fileSystem, httpClient
 }
 
 // AssertRegisteredTask registers a new mock task to the given name
