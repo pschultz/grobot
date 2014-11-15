@@ -70,6 +70,7 @@ func installDependencies(lockFile *LockFile) (bool, error) {
 	for _, p := range lockFile.Packages {
 		updated, err := installPackage(p)
 		if err != nil {
+			fmt.Print("  ")
 			log.Error(err.Error())
 		}
 		if updated == true {
@@ -95,17 +96,18 @@ func installPackage(p *PackageDefinition) (bool, error) {
 	}
 
 	vendorDir := fmt.Sprintf("vendor/src/%s", p.Name)
-	log.Debug("Trying to install package %S from %s repo version %s into %S", p.Name, p.Source.Typ, p.Source.Reference, vendorDir)
+	log.Debug("Trying to install package %S from %s repo version %s", p.Name, p.Source.Typ, p.Source.Reference)
 	targetInfo := grobot.TargetInfo(vendorDir)
 	if targetInfo.ExistingFile {
+		log.Debug("Directory %S does already exist", vendorDir)
 		return false, checkIfPackageHasRequestedVersion(vendorDir, p)
 	} else {
-		return true, checkoutPackage(vendorDir, p)
+		log.Debug("Directory %S does not yet exist", vendorDir)
+		return checkoutPackage(vendorDir, p)
 	}
 }
 
 func checkIfPackageHasRequestedVersion(vendorDir string, p *PackageDefinition) (err error) {
-	log.Debug("Directory %S does already exist", vendorDir)
 	log.Debug("Checking repository version...")
 
 	grobot.SetWorkingDirectory(vendorDir)
@@ -120,18 +122,18 @@ func checkIfPackageHasRequestedVersion(vendorDir string, p *PackageDefinition) (
 	return err
 }
 
-func checkoutPackage(vendorDir string, p *PackageDefinition) (err error) {
+func checkoutPackage(vendorDir string, p *PackageDefinition) (updated bool, err error) {
 	log.Action("Installing package %S ...", p.Name)
 	log.Debug("Determining repository URL ...")
 	gitURL, err := repoRootForImportDynamic(p.Name)
-	log.Debug("Repository URL for %S is %S", p.Name, gitURL)
 	if err != nil {
-		return err
+		return false, err
 	}
 
+	log.Debug("Repository URL for %S is %S", p.Name, gitURL)
 	grobot.ExecuteSilent("git clone %s %s", gitURL, vendorDir)
 	grobot.SetWorkingDirectory(vendorDir)
 	grobot.ExecuteSilent("git checkout %s --quiet", p.Source.Reference)
 	grobot.ResetWorkingDirectory()
-	return nil
+	return true, nil
 }
