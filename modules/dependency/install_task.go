@@ -182,13 +182,23 @@ func installNewDependency(packageName string, lockFile *LockFile) (updated bool,
 	p := newGitPackage(packageName, installedVersion)
 	if lockFile == nil {
 		log.Debug("Writing new lockfile %S", LockFileName)
-		lockFile = &LockFile{[]*PackageDefinition{p}}
+		lockFile = &LockFile{[]*PackageDefinition{}}
 	} else {
 		log.Debug("Updating lockfile %S", LockFileName)
-		lockFile.Packages = append(lockFile.Packages, p)
 	}
 
-	// TODO check p is not already contained in lockfile
+	packageAlreadyInLockFile := false
+	for _, pack := range lockFile.Packages {
+		if pack.Name == packageName {
+			pack.Source.Version = installedVersion
+			packageAlreadyInLockFile = true
+		}
+	}
+	if packageAlreadyInLockFile == false {
+		lockFile.Packages = append(lockFile.Packages, p)
+	} else {
+		log.Action("Package was already contained in %S and has been updated", LockFileName)
+	}
 
 	data, err := json.MarshalIndent(lockFile, "", "    ")
 	err = grobot.WriteFile(LockFileName, data)
