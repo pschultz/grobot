@@ -10,6 +10,16 @@ type PackageDefinition struct {
 }
 
 type SourceConfiguration struct {
-	Typ       string `json:"type"`
-	Reference string `json:"reference"`
+	Typ     string `json:"type"`
+	Version string `json:"version"`
+}
+
+func newGitPackage(name, version string) *PackageDefinition {
+	return &PackageDefinition{
+		Name: name,
+		Source: &SourceConfiguration{
+			Typ:     "git",
+			Version: version,
+		},
+	}
 }

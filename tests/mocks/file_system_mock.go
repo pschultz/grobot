@@ -50,3 +50,13 @@ func (_m *MockFileSystem) ReadFile(path string) ([]byte, error) {
 func (_mr *_MockFileSystemRecorder) ReadFile(arg0 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "ReadFile", arg0)
 }
+
+func (_m *MockFileSystem) WriteFile(path string, data []byte) error {
+	ret := _m.ctrl.Call(_m, "WriteFile", path, data)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+func (_mr *_MockFileSystemRecorder) WriteFile(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "WriteFile", arg0, arg1)
+}

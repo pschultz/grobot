@@ -14,6 +14,7 @@ func init() {
 type FileSystem interface {
 	TargetInfo(path string) (*Target, error)
 	ReadFile(path string) ([]byte, error)
+	WriteFile(path string, data []byte) error
 }
 
 var FileSystemProvider FileSystem
@@ -61,6 +62,14 @@ func ReadFile(path string) ([]byte, error) {
 	return data, nil
 }
 
+func WriteFile(path string, data []byte) error {
+	err := FileSystemProvider.WriteFile(path, data)
+	if err != nil {
+		return fmt.Errorf(`Error while writing file "%s" : %s`, path, err.Error())
+	}
+	return nil
+}
+
 type RealFileSystem struct{}
 
 func (f *RealFileSystem) TargetInfo(path string) (*Target, error) {
@@ -76,4 +85,8 @@ func (f *RealFileSystem) TargetInfo(path string) (*Target, error) {
 
 func (f *RealFileSystem) ReadFile(path string) ([]byte, error) {
 	return ioutil.ReadFile(path)
+}
+
+func (f *RealFileSystem) WriteFile(path string, data []byte) error {
+	return ioutil.WriteFile(path, data, 0644)
 }

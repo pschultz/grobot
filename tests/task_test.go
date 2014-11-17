@@ -91,6 +91,14 @@ var _ = Describe("Tasks", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 
+		It("should pass additional arguments to the task", func() {
+			AssertFileDoesNotExist("main", fileSystem)
+			expectedArguments := []string{"foo", "bar"}
+			AssertLeafDependency("main", mockCtrl, expectedArguments...)
+			_, err := grobot.InvokeTask("main", 0, expectedArguments...)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
 		It("should invoke all dependencies of a task", func() {
 			AssertNoFiles(fileSystem, "main", "dep1", "dep2")
 

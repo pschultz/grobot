@@ -4,22 +4,22 @@
             "name": "github.com/onsi/ginkgo",
             "source": {
                 "type": "git",
-                "reference": "7891f8646dc62f4e32642ba332bbe7cf0097d8c5"
+                "version": "9c7cbc493e1b6f86b6c67d4538c1f42b2ac85d4f"
             }
         },
         {
             "name": "github.com/onsi/gomega",
             "source": {
                 "type": "git",
-                "reference": "2cd6d99ccf3ac7ae8398d8296429161bf7061ae2"
+                "version": "2cd6d99ccf3ac7ae8398d8296429161bf7061ae2"
             }
         },
         {
-          "name": "code.google.com/p/gomock",
-          "source": {
-            "type": "git",
-            "reference": "e033c7513ca3d743bbb64df299bdec29e93fed03"
-          }
+            "name": "code.google.com/p/gomock",
+            "source": {
+                "type": "git",
+                "version": "e033c7513ca3d743bbb64df299bdec29e93fed03"
+            }
         }
     ]
 }
