@@ -27,6 +27,8 @@ func Print(format string, args ...interface{}) {
 	format = strings.Replace(format, "%S", "[<strong>%s</strong>]", -1)
 	format = strings.Replace(format, "<strong>", boldStyle, -1)
 	format = strings.Replace(format, "</strong>", defaultStyle+currentColor, -1)
+	format = strings.Replace(format, "<em>", yellowColor, -1)
+	format = strings.Replace(format, "</em>", defaultStyle+currentColor, -1)
 	fmt.Printf(format+"\n", args...)
 }
 

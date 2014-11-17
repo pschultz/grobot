@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/fgrosse/grobot/log"
 	"regexp"
+	"strings"
 )
 
 const (
@@ -82,14 +83,26 @@ func GetTask(name string) (Task, error) {
 }
 
 func PrintTasks() {
+	taskDescriptions := map[string]string{}
+	longestTaskName := 0
 	for name, task := range tasks {
 		switch t := task.(type) {
 		case Describable:
 			description := t.Description()
-			if description != "" {
-				fmt.Printf("%s : %s\n", name, description)
+			if description == "" {
+				continue
 			}
+			taskDescriptions[name] = description
+			if len(name) > longestTaskName {
+				longestTaskName = len(name)
+			}
+
 		}
+	}
+
+	for name, description := range taskDescriptions {
+		whiteSpace := strings.Repeat(" ", longestTaskName-len(name))
+		log.Print("<em>%s</em> %s: %s", name, whiteSpace, description)
 	}
 }
 

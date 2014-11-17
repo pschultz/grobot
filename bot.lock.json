@@ -4,7 +4,7 @@
             "name": "github.com/onsi/ginkgo",
             "source": {
                 "type": "git",
-                "version": "7891f8646dc62f4e32642ba332bbe7cf0097d8c5"
+                "version": "9c7cbc493e1b6f86b6c67d4538c1f42b2ac85d4f"
             }
         },
         {
@@ -15,11 +15,11 @@
             }
         },
         {
-          "name": "code.google.com/p/gomock",
-          "source": {
-            "type": "git",
-            "version": "e033c7513ca3d743bbb64df299bdec29e93fed03"
-          }
+            "name": "code.google.com/p/gomock",
+            "source": {
+                "type": "git",
+                "version": "e033c7513ca3d743bbb64df299bdec29e93fed03"
+            }
         }
     ]
 }

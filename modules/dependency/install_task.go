@@ -15,7 +15,7 @@ func NewInstallTask() *InstallTask {
 }
 
 func (t *InstallTask) Description() string {
-	return "Install all dependencies that are documented in " + LockFileName
+	return "Install new dependency by providing an additional argument or install all dependencies from " + LockFileName
 }
 
 func (t *InstallTask) Dependencies(string) []string {
@@ -184,6 +184,7 @@ func installNewDependency(packageName string, lockFile *LockFile) (updated bool,
 		log.Debug("Writing new lockfile %S", LockFileName)
 		lockFile = &LockFile{[]*PackageDefinition{p}}
 	} else {
+		log.Debug("Updating lockfile %S", LockFileName)
 		lockFile.Packages = append(lockFile.Packages, p)
 	}
 
