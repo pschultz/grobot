@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/fgrosse/grobot"
 	"github.com/fgrosse/grobot/log"
+	"strings"
 )
 
 type InstallTask struct{}
@@ -125,7 +126,7 @@ func checkIfPackageHasRequestedVersion(vendorDir string, p *PackageDefinition) (
 func checkoutPackage(vendorDir string, p *PackageDefinition) (updated bool, err error) {
 	log.Action("Installing package %S ...", p.Name)
 	log.Debug("Determining repository URL ...")
-	gitURL, err := repoRootForImportDynamic(p.Name)
+	gitURL, err := gitURL(p.Name)
 	if err != nil {
 		return false, err
 	}
@@ -136,4 +137,12 @@ func checkoutPackage(vendorDir string, p *PackageDefinition) (updated bool, err 
 	grobot.ExecuteSilent("git checkout %s --quiet", p.Source.Reference)
 	grobot.ResetWorkingDirectory()
 	return true, nil
+}
+
+func gitURL(packageName string) (string, error) {
+	if strings.HasPrefix(packageName, "code.google.com/") {
+		return "https://" + packageName, nil
+	}
+
+	return repoRootForImportDynamic(packageName)
 }
