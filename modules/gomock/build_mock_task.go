@@ -30,7 +30,7 @@ func (t *BuildMockFileTask) Dependencies(invokedName string) []string {
 	}
 }
 
-func (t *BuildMockFileTask) Invoke(targetName string) (bool, error) {
+func (t *BuildMockFileTask) Invoke(targetName string, args ...string) (bool, error) {
 	mockSource, err := t.getMockSourcePath(targetName)
 	if err != nil {
 		return false, err

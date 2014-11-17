@@ -38,15 +38,20 @@ func (_mr *_MockTaskRecorder) Dependencies(arg0 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "Dependencies", arg0)
 }
 
-func (_m *MockTask) Invoke(name string) (bool, error) {
-	ret := _m.ctrl.Call(_m, "Invoke", name)
+func (_m *MockTask) Invoke(name string, arguments ...string) (bool, error) {
+	_s := []interface{}{name}
+	for _, _x := range arguments {
+		_s = append(_s, _x)
+	}
+	ret := _m.ctrl.Call(_m, "Invoke", _s...)
 	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-func (_mr *_MockTaskRecorder) Invoke(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "Invoke", arg0)
+func (_mr *_MockTaskRecorder) Invoke(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+	_s := append([]interface{}{arg0}, arg1...)
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "Invoke", _s...)
 }
 
 // Mock of Describable interface

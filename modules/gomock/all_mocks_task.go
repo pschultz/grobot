@@ -38,6 +38,6 @@ func (t *AllMocksTask) Dependencies(name string) []string {
 	return t.mockFiles
 }
 
-func (t *AllMocksTask) Invoke(invokedName string) (bool, error) {
+func (t *AllMocksTask) Invoke(invokedName string, args ...string) (bool, error) {
 	return true, nil
 }
