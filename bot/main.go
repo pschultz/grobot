@@ -1,8 +1,6 @@
 package main
 
 import (
-	"flag"
-	"fmt"
 	"github.com/fgrosse/grobot"
 	"github.com/fgrosse/grobot/log"
 
@@ -11,6 +9,8 @@ import (
 	_ "github.com/fgrosse/grobot/modules/ginkgo"
 	_ "github.com/fgrosse/grobot/modules/gomock"
 
+	"flag"
+	"fmt"
 	"os"
 	"strings"
 )
