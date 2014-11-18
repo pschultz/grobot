@@ -1,7 +1,6 @@
 package dependency
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/fgrosse/grobot"
 	"github.com/fgrosse/grobot/log"
@@ -33,32 +32,6 @@ func (t *InstallTask) Invoke(invokedName string, args ...string) (bool, error) {
 	}
 
 	return installNewDependency(args[0], lockFile)
-}
-
-func loadLockFile() (*LockFile, error) {
-	targetInfo := grobot.TargetInfo(LockFileName)
-
-	if targetInfo.ExistingFile == false {
-		log.Print("Lock file %S does not exist", LockFileName)
-		return nil, nil
-	}
-
-	log.Debug("Reading dependency lock file [<strong>%s</strong>]", LockFileName)
-	data, err := grobot.ReadFile(LockFileName)
-	if err != nil {
-		return nil, fmt.Errorf("Error while reading dependency lock file: %s", err.Error())
-	}
-	if len(data) == 0 {
-		return nil, fmt.Errorf("Error while reading dependency lock file: Empty file")
-	}
-
-	var lockFile LockFile
-	err = json.Unmarshal(data, &lockFile)
-	if err != nil {
-		return nil, fmt.Errorf("Could not decode JSON dependency lock file: %s", err.Error())
-	}
-
-	return &lockFile, nil
 }
 
 func installDependencies(lockFile *LockFile) (bool, error) {
@@ -187,20 +160,13 @@ func installNewDependency(packageName string, lockFile *LockFile) (updated bool,
 		log.Debug("Updating lockfile %S", LockFileName)
 	}
 
-	packageAlreadyInLockFile := false
-	for _, pack := range lockFile.Packages {
-		if pack.Name == packageName {
-			pack.Source.Version = installedVersion
-			packageAlreadyInLockFile = true
-		}
-	}
-	if packageAlreadyInLockFile == false {
+	packageInLockFile := lockFile.Package(packageName)
+	if packageInLockFile == nil || packageInLockFile.Source.Version != installedVersion {
 		lockFile.Packages = append(lockFile.Packages, p)
 	} else {
 		log.Action("Package was already contained in %S and has been updated", LockFileName)
 	}
 
-	data, err := json.MarshalIndent(lockFile, "", "    ")
-	err = grobot.WriteFile(LockFileName, data)
+	err = writeLockFile(lockFile)
 	return err == nil, err
 }

@@ -117,7 +117,7 @@ var _ = Describe("Install tasks (new package)", func() {
 				]
 			}`
 			fileSystem.EXPECT().WriteFile(dependency.LockFileName, EqualJsonString(expectedLockFileContent))
-			gomock.Any()
+
 			task := dependency.NewInstallTask()
 			_, err := task.Invoke("install", "code.google.com/p/gomock")
 			Expect(err).NotTo(HaveOccurred())

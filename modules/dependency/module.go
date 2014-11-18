@@ -43,4 +43,5 @@ func (m *Module) LoadConfiguration(config map[string]*json.RawMessage) error {
 
 func (m *Module) registerTasks() {
 	grobot.RegisterTask("install", NewInstallTask())
+	grobot.RegisterTask("update", NewUpdateTask())
 }
