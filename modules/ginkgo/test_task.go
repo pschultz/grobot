@@ -21,7 +21,7 @@ func (t *TestTask) Dependencies(name string) []string {
 	return []string{"vendor/bin/ginkgo"}
 }
 
-func (t *TestTask) Invoke(invokedName string) (bool, error) {
+func (t *TestTask) Invoke(invokedName string, args ...string) (bool, error) {
 	command := "ginkgo -r"
 	if t.conf.TestFolder != "" {
 		command = fmt.Sprintf(`%s "%s"`, command, t.conf.TestFolder)

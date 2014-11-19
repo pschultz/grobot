@@ -1,12 +1,10 @@
 package grobot
 
-import "encoding/json"
-
 var modules = []Module{}
 
 type Module interface {
 	Name() string
-	LoadConfiguration(map[string]*json.RawMessage) error
+	LoadConfiguration(conf *Configuration) error
 }
 
 func RegisterModule(module Module) {

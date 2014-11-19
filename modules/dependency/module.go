@@ -21,8 +21,8 @@ func (m *Module) Name() string {
 	return "Depenency"
 }
 
-func (m *Module) LoadConfiguration(config map[string]*json.RawMessage) error {
-	data, keyExists := config["dependency"]
+func (m *Module) LoadConfiguration(config *grobot.Configuration) error {
+	data, keyExists := config.Get("dependency")
 	if keyExists == false {
 		log.Debug("Using default config")
 		m.conf = defaultConfig
@@ -43,4 +43,5 @@ func (m *Module) LoadConfiguration(config map[string]*json.RawMessage) error {
 
 func (m *Module) registerTasks() {
 	grobot.RegisterTask("install", NewInstallTask())
+	grobot.RegisterTask("update", NewUpdateTask())
 }

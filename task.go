@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/fgrosse/grobot/log"
 	"regexp"
+	"strings"
 )
 
 const (
@@ -19,13 +20,13 @@ var (
 
 type Task interface {
 	Dependencies(invokedName string) []string
-	Invoke(name string) (bool, error)
+	Invoke(name string, arguments ...string) (bool, error)
 }
 
 type nullTask struct{}
 
-func (t *nullTask) Dependencies(invokedName string) []string { return []string{} }
-func (t *nullTask) Invoke(name string) error                 { return nil }
+func (t *nullTask) Dependencies(string) []string   { return []string{} }
+func (t *nullTask) Invoke(string, ...string) error { return nil }
 
 type Describable interface {
 	Description() string
@@ -82,18 +83,30 @@ func GetTask(name string) (Task, error) {
 }
 
 func PrintTasks() {
+	taskDescriptions := map[string]string{}
+	longestTaskName := 0
 	for name, task := range tasks {
 		switch t := task.(type) {
 		case Describable:
 			description := t.Description()
-			if description != "" {
-				fmt.Printf("%s : %s\n", name, description)
+			if description == "" {
+				continue
 			}
+			taskDescriptions[name] = description
+			if len(name) > longestTaskName {
+				longestTaskName = len(name)
+			}
+
 		}
+	}
+
+	for name, description := range taskDescriptions {
+		whiteSpace := strings.Repeat(" ", longestTaskName-len(name))
+		log.Print("<em>%s</em> %s: %s", name, whiteSpace, description)
 	}
 }
 
-func InvokeTask(invokedName string, recursionDepth int) (bool, error) {
+func InvokeTask(invokedName string, recursionDepth int, args ...string) (bool, error) {
 	checkHooks(HookBefore, invokedName, recursionDepth)
 
 	resolvedDependencies[invokedName] = true
@@ -133,12 +146,16 @@ func InvokeTask(invokedName string, recursionDepth int) (bool, error) {
 	if target.ExistingFile && someDependencyUpdatedOrNewer == false {
 		log.Debug("No need to build target [<strong>%s</strong>]", invokedName)
 	} else {
-		message := fmt.Sprintf("%sInvoking task [<strong>%s</strong>] with %T", debugPrefix, invokedName, task)
+		argumentsMessage := ""
+		if len(args) > 0 {
+			argumentsMessage = fmt.Sprintf("with args %v ", args)
+		}
+		message := fmt.Sprintf("%sInvoking task [<strong>%s</strong>] %son %T", debugPrefix, invokedName, argumentsMessage, task)
 		if someDependencyUpdatedOrNewer {
 			message = message + " (dependencies updated or newer)"
 		}
 		log.Debug(message)
-		targetWasUpdated, err = task.Invoke(invokedName)
+		targetWasUpdated, err = task.Invoke(invokedName, args...)
 		if err != nil {
 			return false, err
 		}

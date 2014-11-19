@@ -38,7 +38,7 @@ var _ = Describe("Install tasks", func() {
 						"name": "code.google.com/p/gomock",
 						"source": {
 							"type": "git",
-							"reference": "`+cvsRev+`"
+							"version": "`+cvsRev+`"
 						}
 					}
 				]
@@ -68,7 +68,7 @@ var _ = Describe("Install tasks", func() {
 						"name": "foo.bar/fgrosse/test",
 						"source": {
 							"type": "git",
-							"reference": "` + cvsRev + `"
+							"version": "` + cvsRev + `"
 						}
 					}
 				]

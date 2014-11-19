@@ -18,7 +18,7 @@ func (t *InstallDependencyTask) Dependencies(string) []string {
 	return []string{}
 }
 
-func (t *InstallDependencyTask) Invoke(path string) (bool, error) {
+func (t *InstallDependencyTask) Invoke(path string, args ...string) (bool, error) {
 	path = stripVendorSource(path)
 	log.Print("The dependency %s is not installed in your GOPATH.", path)
 	command := "go get " + path
