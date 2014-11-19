@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-var BotVersion = NewVersion("0.6")
+var BotVersion = grobot.NewVersion("0.6")
 
 const defaultConfigFile = "bot.json"
 
@@ -26,16 +26,18 @@ var showVersion = flag.Bool("version", false, "Display the current version of bo
 var showHelp = flag.Bool("help", false, "Display this help, then exit.")
 
 func main() {
+	parseFlags()
+	loadConfigurationFile()
+	invokeTask()
+}
+
+func parseFlags() {
 	flag.Parse()
 	if *debug == false {
 		defer panicHandler()
 	} else {
 		grobot.EnableDebugMode()
 		log.Debug("Running in grobot debug mode")
-	}
-
-	if err := grobot.LoadConfigFromFile(*configFile, BotVersion); err != nil {
-		log.Fatal(err.Error())
 	}
 
 	if *showTasks {
@@ -52,38 +54,6 @@ func main() {
 		showHelpText()
 		os.Exit(0)
 	}
-
-	taskName := "default"
-	args := filterArgs()
-	if len(args) == 0 {
-		showHelpText()
-		os.Exit(1)
-	}
-
-	taskName = args[0]
-	somethingWasDone, err := grobot.InvokeTask(taskName, 0, args[1:]...)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	if somethingWasDone == false {
-		log.Debug("Task [<strong>%s</strong>] is up to date", taskName)
-	} else {
-		log.Debug("Task [<strong>%s</strong>] has been updated", taskName)
-	}
-}
-
-func filterArgs() []string {
-	args := []string{}
-	for _, a := range os.Args[1:] {
-		if strings.HasPrefix(a, "-") {
-			continue
-		}
-		args = append(args, a)
-	}
-
-	log.Debug("Args: %v", args)
-	return args
 }
 
 func panicHandler() {
@@ -115,4 +85,52 @@ func showHelpText() {
 	log.Print(``)
 	log.Print(`<strong>The following tasks are available with the default configuration file (%s):</strong>`, defaultConfigFile)
 	grobot.PrintTasks()
+}
+
+func loadConfigurationFile() {
+	if *configFile == defaultConfigFile {
+		file := grobot.TargetInfo(*configFile)
+		if file.ExistingFile == false {
+			log.Debug("Default configuration file %S does not exist", defaultConfigFile)
+			return
+		}
+	}
+
+	if err := grobot.LoadConfigFromFile(*configFile, BotVersion); err != nil {
+		log.Fatal(err.Error())
+	}
+}
+
+func invokeTask() {
+	taskName := "default"
+	args := filterArgs()
+	if len(args) == 0 {
+		showHelpText()
+		os.Exit(1)
+	}
+
+	taskName = args[0]
+	somethingWasDone, err := grobot.InvokeTask(taskName, 0, args[1:]...)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	if somethingWasDone == false {
+		log.Debug("Task [<strong>%s</strong>] is up to date", taskName)
+	} else {
+		log.Debug("Task [<strong>%s</strong>] has been updated", taskName)
+	}
+}
+
+func filterArgs() []string {
+	args := []string{}
+	for _, a := range os.Args[1:] {
+		if strings.HasPrefix(a, "-") {
+			continue
+		}
+		args = append(args, a)
+	}
+
+	log.Debug("Args: %v", args)
+	return args
 }
