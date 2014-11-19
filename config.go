@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/fgrosse/grobot/log"
-	"io/ioutil"
 )
 
 var isDebug = false
@@ -38,9 +37,9 @@ func (c *Configuration) Get(field string) (raw *json.RawMessage, exists bool) {
 	return
 }
 
-func LoadConfigFromFile(confFilePath string) error {
+func LoadConfigFromFile(confFilePath string, currentVersion *Version) error {
 	log.Debug("Loading configuration from file '%s'", confFilePath)
-	data, err := ioutil.ReadFile(confFilePath)
+	data, err := ReadFile(confFilePath)
 	if err != nil {
 		return fmt.Errorf("Could not read configuration : %s", err.Error())
 	}
@@ -49,6 +48,10 @@ func LoadConfigFromFile(confFilePath string) error {
 	err = json.Unmarshal(data, &config)
 	if err != nil {
 		return fmt.Errorf("Error while unmarshalling configuration file '%s' : %s", confFilePath, err.Error())
+	}
+
+	if config.Version.GreaterThen(currentVersion) {
+		return fmt.Errorf(`Error while read configuration file %s : The minimum required bot version is "%s" but you are running bot version "%s"`, confFilePath, config.Version.String(), currentVersion.String())
 	}
 
 	for _, module := range modules {

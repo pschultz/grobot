@@ -15,7 +15,8 @@ import (
 	"strings"
 )
 
-const BotVersion = "0.6"
+var BotVersion = NewVersion("0.6")
+
 const defaultConfigFile = "bot.json"
 
 var debug = flag.Bool("debug", false, "show a lot more debug information on the tasks")
@@ -33,7 +34,7 @@ func main() {
 		log.Debug("Running in grobot debug mode")
 	}
 
-	if err := grobot.LoadConfigFromFile(*configFile); err != nil {
+	if err := grobot.LoadConfigFromFile(*configFile, BotVersion); err != nil {
 		log.Fatal(err.Error())
 	}
 
