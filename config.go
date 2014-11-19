@@ -8,6 +8,10 @@ import (
 
 var isDebug = false
 
+var defaultConfig = Configuration{
+	Version: NewVersion("none"),
+}
+
 func EnableDebugMode() {
 	isDebug = true
 	log.EnableDebug()
@@ -18,7 +22,7 @@ func IsDebugMode() bool {
 }
 
 type Configuration struct {
-	Version          Version `json:"version"`
+	Version          *Version `json:"version"`
 	RawModuleConfigs map[string]*json.RawMessage
 }
 
@@ -26,7 +30,10 @@ func (c *Configuration) UnmarshalJSON(b []byte) error {
 	err := json.Unmarshal(b, &c.RawModuleConfigs)
 	if version, versionIsDefined := c.RawModuleConfigs["version"]; versionIsDefined {
 		delete(c.RawModuleConfigs, "version")
-		err = json.Unmarshal(*version, &c.Version)
+		c.Version = new(Version)
+		err = json.Unmarshal(*version, c.Version)
+	} else {
+		c.Version = NewVersion("none")
 	}
 
 	return err
@@ -54,14 +61,22 @@ func LoadConfigFromFile(confFilePath string, currentVersion *Version) error {
 		return fmt.Errorf(`Error while read configuration file %s : The minimum required bot version is "%s" but you are running bot version "%s"`, confFilePath, config.Version.String(), currentVersion.String())
 	}
 
+	loadModules(&config)
+	return nil
+}
+
+func LoadBuiltinConfig() {
+	log.Debug("Loading modules from builtin configuration")
+	loadModules(&defaultConfig)
+}
+
+func loadModules(config *Configuration) {
 	for _, module := range modules {
 		log.Debug("Loading configuration for module [<strong>%s</strong>]", module.Name())
-		err = module.LoadConfiguration(&config)
+		err := module.LoadConfiguration(config)
 		if err != nil {
 			log.Error("Error whileloading module %s : %s", module.Name(), err.Error())
 		}
 		log.Debug("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 	}
-
-	return nil
 }

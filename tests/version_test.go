@@ -19,6 +19,16 @@ var _ = Describe("Version", func() {
 		Expect(version.Minor).To(Equal(6))
 	})
 
+	It("should unmarshable from JSON when the `none` alias is used", func() {
+		var version grobot.Version
+		data := []byte(`"none"`)
+		err := json.Unmarshal(data, &version)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(version.String()).To(Equal("none"))
+		Expect(version.Major).To(Equal(0))
+		Expect(version.Minor).To(Equal(0))
+	})
+
 	Context("comparing", func() {
 		It("should never be greater than the same version", func() {
 			version := grobot.NewVersion("0.7")

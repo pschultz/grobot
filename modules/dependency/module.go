@@ -22,7 +22,7 @@ func (m *Module) Name() string {
 }
 
 func (m *Module) LoadConfiguration(config *grobot.Configuration) error {
-	data, keyExists := config.Get("gomock")
+	data, keyExists := config.Get("dependency")
 	if keyExists == false {
 		log.Debug("Using default config")
 		m.conf = defaultConfig

@@ -21,7 +21,7 @@ func (m *Module) Name() string {
 }
 
 func (m *Module) LoadConfiguration(config *grobot.Configuration) error {
-	data, keyExists := config.Get("gomock")
+	data, keyExists := config.Get("ginkgo")
 	if keyExists == false {
 		log.Debug("Did not load Ginkgo module: configuration key ginkgo is not set")
 		return nil

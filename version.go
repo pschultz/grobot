@@ -29,6 +29,12 @@ func (v *Version) UnmarshalJSON(b []byte) error {
 }
 
 func (v *Version) parse() (err error) {
+	if v.raw == "none" {
+		v.Major = 0
+		v.Minor = 0
+		return nil
+	}
+
 	versionParts := strings.SplitN(v.raw, ".", 2)
 	v.Major, err = strconv.Atoi(versionParts[0])
 	if err != nil {

@@ -26,12 +26,6 @@ var showVersion = flag.Bool("version", false, "Display the current version of bo
 var showHelp = flag.Bool("help", false, "Display this help, then exit.")
 
 func main() {
-	parseFlags()
-	loadConfigurationFile()
-	invokeTask()
-}
-
-func parseFlags() {
 	flag.Parse()
 	if *debug == false {
 		defer panicHandler()
@@ -40,6 +34,12 @@ func parseFlags() {
 		log.Debug("Running in grobot debug mode")
 	}
 
+	parseOutputFlags()
+	loadConfigurationFile()
+	invokeTask()
+}
+
+func parseOutputFlags() {
 	if *showTasks {
 		grobot.PrintTasks()
 		os.Exit(0)
@@ -78,13 +78,14 @@ func printVersion() {
 func showHelpText() {
 	log.Action("Bot is an automation and build tool for the go programming language.")
 	log.Print(`Version: %s`, BotVersion)
-	log.Print(`Usage:   <strong>bot</strong> <task> [optional arguments]`)
-	log.Print(`Example: bot install code.google.com/p/gomock`)
+	log.Print(`Usage:   <strong>bot</strong> [optonal flags] <task> [optional arguments]`)
+	log.Print(`Example: bot -debug install code.google.com/p/gomock`)
 	log.Print(``)
 	log.Print(`Which tasks are available depends on the used configuration file.`)
 	log.Print(``)
 	log.Print(`<strong>The following tasks are available with the default configuration file (%s):</strong>`, defaultConfigFile)
 	grobot.PrintTasks()
+	log.Print(``)
 }
 
 func loadConfigurationFile() {
@@ -92,6 +93,7 @@ func loadConfigurationFile() {
 		file := grobot.TargetInfo(*configFile)
 		if file.ExistingFile == false {
 			log.Debug("Default configuration file %S does not exist", defaultConfigFile)
+			grobot.LoadBuiltinConfig()
 			return
 		}
 	}
