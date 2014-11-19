@@ -20,7 +20,7 @@ var _ = Describe("Configuration", func() {
 		var conf grobot.Configuration
 		err := json.Unmarshal(configData, &conf)
 		Expect(err).NotTo(HaveOccurred())
-		Expect(conf.Version).To(Equal("0.6"))
+		Expect(conf.Version.String()).To(Equal("0.6"))
 	})
 
 	It("should unmarshal the module configurations", func() {

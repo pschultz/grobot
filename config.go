@@ -19,7 +19,7 @@ func IsDebugMode() bool {
 }
 
 type Configuration struct {
-	Version          string `json:"version"`
+	Version          Version `json:"version"`
 	RawModuleConfigs map[string]*json.RawMessage
 }
 
