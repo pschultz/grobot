@@ -59,6 +59,7 @@ func loadLockFile() (*LockFile, error) {
 }
 
 func writeLockFile(lockFile *LockFile) error {
+	log.Debug("Writing lock file %S", LockFileName)
 	data, err := json.MarshalIndent(lockFile, "", "    ")
 	if err != nil {
 		return fmt.Errorf("Could not write lockfile %s : %s", LockFileName, err.Error())
