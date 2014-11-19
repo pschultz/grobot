@@ -15,11 +15,14 @@ import (
 	"strings"
 )
 
-const defaultConfigFile = "grobot.json"
+const BotVersion = "0.6"
+const defaultConfigFile = "bot.json"
 
 var debug = flag.Bool("debug", false, "show a lot more debug information on the tasks")
 var configFile = flag.String("config", defaultConfigFile, "set the used config file")
 var showTasks = flag.Bool("t", false, "Display available tasks with descriptions, then exit.")
+var showVersion = flag.Bool("version", false, "Display the current version of bot, then exit.")
+var showHelp = flag.Bool("help", false, "Display this help, then exit.")
 
 func main() {
 	flag.Parse()
@@ -39,14 +42,20 @@ func main() {
 		os.Exit(0)
 	}
 
+	if *showVersion {
+		printVersion()
+		os.Exit(0)
+	}
+
+	if *showHelp {
+		showHelpText()
+		os.Exit(0)
+	}
+
 	taskName := "default"
 	args := filterArgs()
 	if len(args) == 0 {
-		log.Action("No target given. Please give me a target as first parameter.")
-		log.Print("Usage: bot <task> [parameters]\n")
-		log.Print("The following tasks are available:")
-		grobot.PrintTasks()
-		log.Print("")
+		showHelpText()
 		os.Exit(1)
 	}
 
@@ -89,4 +98,20 @@ func panicHandler() {
 		}
 		log.Fatal(err.Error())
 	}
+}
+
+func printVersion() {
+	log.Action("You are running bot version %s", BotVersion)
+}
+
+func showHelpText() {
+	log.Action("Bot is an automation and build tool for the go programming language.")
+	log.Print(`Version: %s`, BotVersion)
+	log.Print(`Usage:   <strong>bot</strong> <task> [optional arguments]`)
+	log.Print(`Example: bot install code.google.com/p/gomock`)
+	log.Print(``)
+	log.Print(`Which tasks are available depends on the used configuration file.`)
+	log.Print(``)
+	log.Print(`<strong>The following tasks are available with the default configuration file (%s):</strong>`, defaultConfigFile)
+	grobot.PrintTasks()
 }
