@@ -20,8 +20,8 @@ func (m *Module) Name() string {
 	return "Gomock"
 }
 
-func (m *Module) LoadConfiguration(config map[string]*json.RawMessage) error {
-	data, keyExists := config["gomock"]
+func (m *Module) LoadConfiguration(config *grobot.Configuration) error {
+	data, keyExists := config.Get("gomock")
 	if keyExists == false {
 		log.Debug("Did not load Gomock module: configuration key gomock is not set")
 		return nil
