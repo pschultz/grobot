@@ -6,6 +6,7 @@ import (
 
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 type LockFile struct {
@@ -69,10 +70,21 @@ func writeLockFile(lockFile *LockFile) error {
 }
 
 func (l *LockFile) Package(packageName string) *PackageDefinition {
+	matches := []*PackageDefinition{}
 	for _, p := range l.Packages {
 		if p.Name == packageName {
 			return p
 		}
+
+		if strings.Contains(p.Name, packageName) {
+			matches = append(matches, p)
+		}
 	}
+
+	if len(matches) == 1 {
+		log.Debug("Autocompleted package name %S to %S", packageName, matches[0].Name)
+		return matches[0]
+	}
+
 	return nil
 }
