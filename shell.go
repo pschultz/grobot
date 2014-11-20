@@ -101,14 +101,17 @@ func (s *SystemShell) Execute(cmdLine string, silent bool) (string, error) {
 
 	err := cmd.Run()
 	if err != nil {
-		errMessage := fmt.Sprintf("%s\n\n$ %s", err.Error(), cmdLine)
-		stdOutMsg := stdOut.Output()
-		if strings.TrimSpace(stdOutMsg) != "" {
-			errMessage = fmt.Sprintf("%s\nOutput from std out: \n%s", errMessage, stdOutMsg)
-		}
-		stdErrMsg := stdErr.Output()
-		if strings.TrimSpace(stdErrMsg) != "" {
-			errMessage = fmt.Sprintf("%s\n\nOutput from std err: \n%s", errMessage, stdErrMsg)
+		errMessage := err.Error()
+		if silent {
+			errMessage := fmt.Sprintf("%s\n\n$ %s", errMessage, cmdLine)
+			stdOutMsg := stdOut.Output()
+			if strings.TrimSpace(stdOutMsg) != "" {
+				errMessage = fmt.Sprintf("%s\nOutput from std out: \n%s", errMessage, stdOutMsg)
+			}
+			stdErrMsg := stdErr.Output()
+			if strings.TrimSpace(stdErrMsg) != "" {
+				errMessage = fmt.Sprintf("%s\n\nOutput from std err: \n%s", errMessage, stdErrMsg)
+			}
 		}
 		err = fmt.Errorf(errMessage)
 	}
