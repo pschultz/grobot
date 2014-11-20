@@ -17,10 +17,8 @@ import (
 
 var BotVersion = grobot.NewVersion("0.7")
 
-const defaultConfigFile = "bot.json"
-
 var debug = flag.Bool("debug", false, "show a lot more debug information on the tasks")
-var configFile = flag.String("config", defaultConfigFile, "set the used config file")
+var configFile = flag.String("config", grobot.DefaultConfigFileName, "set the used config file")
 var showTasks = flag.Bool("t", false, "Display available tasks with descriptions, then exit.")
 var showVersion = flag.Bool("version", false, "Display the current version of bot, then exit.")
 var showHelp = flag.Bool("help", false, "Display this help, then exit.")

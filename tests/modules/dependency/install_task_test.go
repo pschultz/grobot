@@ -17,12 +17,14 @@ var _ = Describe("Install tasks", func() {
 		shell           *MockShell
 		fileSystem      *MockFileSystem
 		httpClient      *MockHttpClient
+		module          *dependency.Module
 		lockFileContent string
 	)
 
 	BeforeEach(func() {
 		mockCtrl = gomock.NewController(GinkgoT())
 		shell, fileSystem, httpClient = SetupTestEnvironment(mockCtrl)
+		module = &dependency.Module{}
 	})
 
 	AfterEach(func() {
@@ -52,7 +54,7 @@ var _ = Describe("Install tasks", func() {
 			shell.EXPECT().SetWorkingDirectory(""),
 		)
 
-		task := dependency.NewInstallTask()
+		task := dependency.NewInstallTask(module)
 		_, err := task.Invoke("install")
 		Expect(err).NotTo(HaveOccurred())
 	})
@@ -101,7 +103,7 @@ var _ = Describe("Install tasks", func() {
 					shell.EXPECT().SetWorkingDirectory(""),
 				)
 
-				task := dependency.NewInstallTask()
+				task := dependency.NewInstallTask(module)
 				_, err := task.Invoke("install")
 				Expect(err).NotTo(HaveOccurred())
 			})
@@ -118,7 +120,7 @@ var _ = Describe("Install tasks", func() {
 					shell.EXPECT().Execute("git rev-parse HEAD", true).Return(cvsRev, nil),
 					shell.EXPECT().SetWorkingDirectory(""),
 				)
-				task := dependency.NewInstallTask()
+				task := dependency.NewInstallTask(module)
 				_, err := task.Invoke("install")
 				Expect(err).NotTo(HaveOccurred())
 			})

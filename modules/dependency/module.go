@@ -14,7 +14,11 @@ func init() {
 }
 
 type Module struct {
-	conf Configuration
+	conf *Configuration
+}
+
+func NewModule() *Module {
+	return &Module{conf: defaultConfig}
 }
 
 func (m *Module) Name() string {
@@ -22,18 +26,16 @@ func (m *Module) Name() string {
 }
 
 func (m *Module) LoadConfiguration(config *grobot.Configuration) error {
-	data, keyExists := config.Get("dependency")
+	data, keyExists := config.Get(moduleConfigKey)
 	if keyExists == false {
 		log.Debug("Using default config")
 		m.conf = defaultConfig
 	} else {
-		var newConfig Configuration
-		err := json.Unmarshal(*data, &newConfig)
+		m.conf = new(Configuration)
+		err := json.Unmarshal(*data, m.conf)
 		if err != nil {
-			return fmt.Errorf("could not parse configuration key 'dependency' : %s", err.Error())
+			return fmt.Errorf("could not parse configuration key '%s' : %s", moduleConfigKey, err.Error())
 		}
-
-		m.conf = newConfig
 	}
 
 	log.Debug("Using vendors folder '%s'", m.conf.VendorsFolder)
@@ -42,6 +44,6 @@ func (m *Module) LoadConfiguration(config *grobot.Configuration) error {
 }
 
 func (m *Module) registerTasks() {
-	grobot.RegisterTask("install", NewInstallTask())
+	grobot.RegisterTask("install", NewInstallTask(m))
 	grobot.RegisterTask("update", NewUpdateTask())
 }

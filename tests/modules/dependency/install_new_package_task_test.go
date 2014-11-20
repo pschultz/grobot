@@ -7,6 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"code.google.com/p/gomock/gomock"
+	"github.com/fgrosse/grobot"
 	"github.com/fgrosse/grobot/modules/dependency"
 )
 
@@ -16,11 +17,25 @@ var _ = Describe("Install tasks (new package)", func() {
 		shell      *MockShell
 		fileSystem *MockFileSystem
 		httpClient *MockHttpClient
+		module     *dependency.Module
 	)
 
 	BeforeEach(func() {
 		mockCtrl = gomock.NewController(GinkgoT())
 		shell, fileSystem, httpClient = SetupTestEnvironment(mockCtrl)
+		AssertFileWithContentExists(grobot.DefaultConfigFileName, `{
+			"bot-version": "0.7",
+			"foo": {
+				"bar": "blup"
+			},
+			"dependency": {
+				"folder": "vendor"
+			}
+		}`, AnyTime, fileSystem)
+
+		err := grobot.LoadConfigFromFile(grobot.DefaultConfigFileName, grobot.NewVersion("0.7"))
+		Expect(err).NotTo(HaveOccurred())
+		module = grobot.GetModule("Depenency").(*dependency.Module)
 	})
 
 	AfterEach(func() {
@@ -31,7 +46,7 @@ var _ = Describe("Install tasks (new package)", func() {
 		It("should install a new package if given an additional argument", func() {
 			AssertFileDoesNotExist(dependency.LockFileName, fileSystem)
 			vendorDir := "vendor/src/code.google.com/p/gomock"
-			AssertFileDoesNotExist(vendorDir, fileSystem)
+			AssertDirectoryDoesNotExist(vendorDir, fileSystem)
 			gomock.InOrder(
 				shell.EXPECT().Execute("git clone https://code.google.com/p/gomock "+vendorDir, true),
 				shell.EXPECT().SetWorkingDirectory(vendorDir),
@@ -52,8 +67,9 @@ var _ = Describe("Install tasks (new package)", func() {
 				]
 			}`
 			fileSystem.EXPECT().WriteFile(dependency.LockFileName, EqualJsonString(expectedLockFileContent))
-			gomock.Any()
-			task := dependency.NewInstallTask()
+			fileSystem.EXPECT().WriteFile(grobot.DefaultConfigFileName, gomock.Any()) // this is tested separately
+
+			task := dependency.NewInstallTask(module)
 			_, err := task.Invoke("install", "code.google.com/p/gomock")
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -82,7 +98,7 @@ var _ = Describe("Install tasks (new package)", func() {
 			}`
 			AssertFileWithContentExists(dependency.LockFileName, existingLockFileContent, AnyTime, fileSystem)
 			vendorDir := "vendor/src/code.google.com/p/gomock"
-			AssertFileDoesNotExist(vendorDir, fileSystem)
+			AssertDirectoryDoesNotExist(vendorDir, fileSystem)
 			gomock.InOrder(
 				shell.EXPECT().Execute("git clone https://code.google.com/p/gomock "+vendorDir, true),
 				shell.EXPECT().SetWorkingDirectory(vendorDir),
@@ -117,10 +133,43 @@ var _ = Describe("Install tasks (new package)", func() {
 				]
 			}`
 			fileSystem.EXPECT().WriteFile(dependency.LockFileName, EqualJsonString(expectedLockFileContent))
+			fileSystem.EXPECT().WriteFile(grobot.DefaultConfigFileName, gomock.Any()) // this is tested separately
 
-			task := dependency.NewInstallTask()
+			task := dependency.NewInstallTask(module)
 			_, err := task.Invoke("install", "code.google.com/p/gomock")
 			Expect(err).NotTo(HaveOccurred())
 		})
+	})
+
+	It("should add the new dependencies to the dependency module in the config file", func() {
+		AssertFileDoesNotExist(dependency.LockFileName, fileSystem)
+		vendorDir := "vendor/src/code.google.com/p/gomock"
+		AssertDirectoryDoesNotExist(vendorDir, fileSystem)
+		shell.EXPECT().Execute(gomock.Any(), gomock.Any()).AnyTimes() // not tested here
+		shell.EXPECT().SetWorkingDirectory(gomock.Any()).AnyTimes()   // not tested here
+
+		expectedConfigFileContent := `
+			{
+				"bot-version": "0.7",
+				"foo": {
+					"bar": "blup"
+				},
+				"dependency": {
+					"folder": "vendor",
+					"packages": [
+						{
+							"name": "code.google.com/p/gomock",
+							"type": "git",
+							"version": "master"
+						}
+					]
+				}
+			}`
+		fileSystem.EXPECT().WriteFile(dependency.LockFileName, gomock.Any()) // not tested here
+		fileSystem.EXPECT().WriteFile(grobot.DefaultConfigFileName, EqualJsonString(expectedConfigFileContent))
+
+		task := dependency.NewInstallTask(module)
+		_, err := task.Invoke("install", "code.google.com/p/gomock")
+		Expect(err).NotTo(HaveOccurred())
 	})
 })

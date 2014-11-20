@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+var NoVersion = &Version{raw: "none"}
+
 type Version struct {
 	raw   string
 	Major int
@@ -28,8 +30,12 @@ func (v *Version) UnmarshalJSON(b []byte) error {
 	return v.parse()
 }
 
+func (v *Version) MarshalJSON() ([]byte, error) {
+	return json.Marshal(v.raw)
+}
+
 func (v *Version) parse() (err error) {
-	if v.raw == "none" {
+	if v.raw == NoVersion.raw {
 		v.Major = 0
 		v.Minor = 0
 		return nil

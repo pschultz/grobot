@@ -10,3 +10,12 @@ type Module interface {
 func RegisterModule(module Module) {
 	modules = append(modules, module)
 }
+
+func GetModule(name string) Module {
+	for _, m := range modules {
+		if m.Name() == name {
+			return m
+		}
+	}
+	return nil
+}

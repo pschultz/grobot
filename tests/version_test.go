@@ -19,6 +19,13 @@ var _ = Describe("Version", func() {
 		Expect(version.Minor).To(Equal(6))
 	})
 
+	It("should marshal into the raw format", func() {
+		version := grobot.NewVersion("0.6")
+		data, err := json.Marshal(version)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(string(data)).To(Equal(`"0.6"`))
+	})
+
 	It("should unmarshable from JSON when the `none` alias is used", func() {
 		var version grobot.Version
 		data := []byte(`"none"`)

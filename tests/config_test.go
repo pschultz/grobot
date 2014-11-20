@@ -14,11 +14,11 @@ import (
 
 var _ = Describe("Configuration", func() {
 	configData := []byte(`{
-		"bot-version": "0.6",
-		"ginkgo": {
-			"folder": "tests"
-		}
-	}`)
+        "bot-version": "0.6",
+        "ginkgo": {
+            "folder": "tests"
+        }
+    }`)
 
 	It("should unmarshal the configuration version", func() {
 		var conf grobot.Configuration
@@ -43,8 +43,8 @@ var _ = Describe("Configuration", func() {
 		rawConf, exists := conf.Get("ginkgo")
 		Expect(exists).To(BeTrue())
 		Expect(string(*rawConf)).To(Equal(string(`{
-			"folder": "tests"
-		}`)))
+            "folder": "tests"
+        }`)))
 
 		_, exists = conf.Get("foobar")
 		Expect(exists).To(BeFalse())
@@ -64,5 +64,16 @@ var _ = Describe("Configuration", func() {
 
 		grobot.Reset()
 		mockCtrl.Finish()
+	})
+
+	It("should marshal into the correct JSON", func() {
+		var conf grobot.Configuration
+		err := json.Unmarshal(configData, &conf)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(conf.Version.String()).To(Equal("0.6"))
+
+		data, err := json.MarshalIndent(&conf, "    ", "    ")
+		Expect(err).NotTo(HaveOccurred())
+		Expect(string(data)).To(Equal(string(configData)))
 	})
 })

@@ -7,10 +7,12 @@ import (
 	"strings"
 )
 
-type InstallTask struct{}
+type InstallTask struct {
+	module *Module
+}
 
-func NewInstallTask() *InstallTask {
-	return &InstallTask{}
+func NewInstallTask(m *Module) *InstallTask {
+	return &InstallTask{m}
 }
 
 func (t *InstallTask) Description() string {
@@ -31,7 +33,7 @@ func (t *InstallTask) Invoke(invokedName string, args ...string) (bool, error) {
 		return installDependencies(lockFile)
 	}
 
-	return installNewDependency(args[0], lockFile)
+	return t.installNewDependency(args[0], lockFile)
 }
 
 func installDependencies(lockFile *LockFile) (bool, error) {
@@ -130,43 +132,4 @@ func gitURL(packageName string) (url string, err error) {
 		log.Debug("Repository URL for %S is %S", packageName, url)
 	}
 	return url, err
-}
-
-func installNewDependency(packageName string, lockFile *LockFile) (updated bool, err error) {
-	log.Action("Installing new package %S", packageName)
-	vendorDir := getInstallDestination(packageName)
-	targetInfo := grobot.TargetInfo(vendorDir)
-	if targetInfo.ExistingFile {
-		return false, fmt.Errorf("Can not install new package %s : directory %s does already exist", packageName, vendorDir)
-	}
-
-	log.Debug("Directory %S does not yet exist", vendorDir)
-	gitURL, err := gitURL(packageName)
-	if err != nil {
-		return false, err
-	}
-
-	grobot.ExecuteSilent("git clone %s %s", gitURL, vendorDir)
-	grobot.SetWorkingDirectory(vendorDir)
-	installedVersion := grobot.ExecuteSilent("git rev-parse HEAD")
-	log.Debug("Successfully installed version %S into %S", installedVersion, vendorDir)
-	grobot.ResetWorkingDirectory()
-
-	p := newGitPackage(packageName, installedVersion)
-	if lockFile == nil {
-		log.Debug("Writing new lockfile %S", LockFileName)
-		lockFile = &LockFile{[]*PackageDefinition{}}
-	} else {
-		log.Debug("Updating lockfile %S", LockFileName)
-	}
-
-	packageInLockFile := lockFile.Package(packageName)
-	if packageInLockFile == nil || packageInLockFile.Source.Version != installedVersion {
-		lockFile.Packages = append(lockFile.Packages, p)
-	} else {
-		log.Action("Package was already contained in %S and has been updated", LockFileName)
-	}
-
-	err = writeLockFile(lockFile)
-	return err == nil, err
 }

@@ -37,7 +37,7 @@ func loadLockFile() (*LockFile, error) {
 	targetInfo := grobot.TargetInfo(LockFileName)
 
 	if targetInfo.ExistingFile == false {
-		log.Print("Lock file %S does not exist", LockFileName)
+		log.Print("Lock file %S does not yet exist and will not be loaded", LockFileName)
 		return nil, nil
 	}
 
