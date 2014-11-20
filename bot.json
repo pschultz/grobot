@@ -1,5 +1,28 @@
 {
     "bot-version": "0.7",
+    "dependency": {
+        "folder": "vendor",
+        "packages": [
+            {
+                "name": "github.com/onsi/ginkgo",
+                "type": "git",
+                "version": "branch:master"
+            },
+            {
+                "name": "github.com/onsi/gomega",
+                "type": "git",
+                "version": "branch:master"
+            },
+            {
+                "name": "code.google.com/p/gomock",
+                "type": "git",
+                "version": "branch:master"
+            }
+        ]
+    },
+    "ginkgo": {
+        "folder": "tests"
+    },
     "gomock": {
         "folder": "tests/mocks",
         "package": "mocks",
@@ -11,8 +34,5 @@
                 "imports": ".=github.com/fgrosse/grobot"
             }
         }
-    },
-    "ginkgo": {
-        "folder": "tests"
     }
 }

@@ -83,7 +83,7 @@ func (t *InstallTask) addNewDependencyToConfiguration(packageName string) error 
 	moduleConfig.Packages = append(moduleConfig.Packages, &PackageConfigDefinition{
 		Name:    packageName,
 		Type:    "git",
-		Version: grobot.NewVersion("master"),
+		Version: grobot.NewVersion("branch:master"),
 	})
 	moduleConfigBytes, err := json.Marshal(moduleConfig)
 	moduleConfigRaw := json.RawMessage(moduleConfigBytes)

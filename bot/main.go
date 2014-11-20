@@ -81,16 +81,16 @@ func showHelpText() {
 	log.Print(``)
 	log.Print(`Which tasks are available depends on the used configuration file.`)
 	log.Print(``)
-	log.Print(`<strong>The following tasks are available with the default configuration file (%s):</strong>`, defaultConfigFile)
+	log.Print(`<strong>The following tasks are available with the default configuration file (%s):</strong>`, grobot.DefaultConfigFileName)
 	grobot.PrintTasks()
 	log.Print(``)
 }
 
 func loadConfigurationFile() {
-	if *configFile == defaultConfigFile {
+	if *configFile == grobot.DefaultConfigFileName {
 		file := grobot.TargetInfo(*configFile)
 		if file.ExistingFile == false {
-			log.Debug("Default configuration file %S does not exist", defaultConfigFile)
+			log.Debug("Default configuration file %S does not exist", grobot.DefaultConfigFileName)
 			grobot.LoadBuiltinConfig()
 			return
 		}

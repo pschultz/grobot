@@ -160,7 +160,7 @@ var _ = Describe("Install tasks (new package)", func() {
 						{
 							"name": "code.google.com/p/gomock",
 							"type": "git",
-							"version": "master"
+							"version": "branch:master"
 						}
 					]
 				}
