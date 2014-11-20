@@ -54,3 +54,9 @@ func AssertFileWithContentExists(path, content string, modTime time.Time, fileSy
 	fileSystem.EXPECT().TargetInfo(path).Return(&targetInfo, nil).AnyTimes()
 	fileSystem.EXPECT().ReadFile(path).Return([]byte(content), nil)
 }
+
+func AssertPackageHasNoDependencies(packageName string, fileSystem *mocks.MockFileSystem) {
+	vendorDir := "vendor/src/" + packageName
+	AssertDirectoryDoesNotExist(vendorDir, fileSystem)
+	AssertFileDoesNotExist(vendorDir+"/"+grobot.ConfigFileName, fileSystem)
+}

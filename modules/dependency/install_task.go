@@ -33,7 +33,8 @@ func (t *InstallTask) Invoke(invokedName string, args ...string) (bool, error) {
 		return installDependencies(lockFile)
 	}
 
-	return t.installNewDependency(args[0], lockFile)
+	packageName := args[0]
+	return t.installNewDependency(packageName, lockFile)
 }
 
 func installDependencies(lockFile *LockFile) (bool, error) {

@@ -66,6 +66,8 @@ func (c *Configuration) Get(field string) (raw *json.RawMessage, exists bool) {
 	return
 }
 
+// LoadConfigFromFile loads a bot configuration from the given file and initializes all modules
+// with this configuration.
 func LoadConfigFromFile(confFilePath string, currentVersion *Version) (*Configuration, error) {
 	log.Debug("Loading configuration from file '%s'", confFilePath)
 	data, err := ReadFile(confFilePath)

@@ -25,6 +25,14 @@ func (m *Module) Name() string {
 	return "Depenency"
 }
 
+func (m *Module) BotVersion() *grobot.Version {
+	if m.conf == nil || m.conf.globalConfig == nil {
+		return grobot.NoVersion
+	}
+
+	return m.conf.globalConfig.Version
+}
+
 func (m *Module) LoadConfiguration(config *grobot.Configuration) error {
 	data, keyExists := config.Get(moduleConfigKey)
 	if keyExists == false {
@@ -38,7 +46,6 @@ func (m *Module) LoadConfiguration(config *grobot.Configuration) error {
 		}
 	}
 
-	log.Debug("Using vendors folder '%s'", m.conf.VendorsFolder)
 	m.conf.globalConfig = config
 	m.registerTasks()
 	return nil

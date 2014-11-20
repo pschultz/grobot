@@ -47,6 +47,7 @@ var _ = Describe("Install tasks (new package)", func() {
 			AssertFileDoesNotExist(dependency.LockFileName, fileSystem)
 			vendorDir := "vendor/src/code.google.com/p/gomock"
 			AssertDirectoryDoesNotExist(vendorDir, fileSystem)
+			AssertFileDoesNotExist(vendorDir+"/bot.json", fileSystem)
 			gomock.InOrder(
 				shell.EXPECT().Execute("git clone https://code.google.com/p/gomock "+vendorDir, true),
 				shell.EXPECT().SetWorkingDirectory(vendorDir),
@@ -98,7 +99,8 @@ var _ = Describe("Install tasks (new package)", func() {
 			}`
 			AssertFileWithContentExists(dependency.LockFileName, existingLockFileContent, AnyTime, fileSystem)
 			vendorDir := "vendor/src/code.google.com/p/gomock"
-			AssertDirectoryDoesNotExist(vendorDir, fileSystem)
+			AssertPackageHasNoDependencies("code.google.com/p/gomock", fileSystem)
+
 			gomock.InOrder(
 				shell.EXPECT().Execute("git clone https://code.google.com/p/gomock "+vendorDir, true),
 				shell.EXPECT().SetWorkingDirectory(vendorDir),
@@ -143,8 +145,7 @@ var _ = Describe("Install tasks (new package)", func() {
 
 	It("should add the new dependencies to the dependency module in the config file", func() {
 		AssertFileDoesNotExist(dependency.LockFileName, fileSystem)
-		vendorDir := "vendor/src/code.google.com/p/gomock"
-		AssertDirectoryDoesNotExist(vendorDir, fileSystem)
+		AssertPackageHasNoDependencies("code.google.com/p/gomock", fileSystem)
 		shell.EXPECT().Execute(gomock.Any(), gomock.Any()).AnyTimes() // not tested here
 		shell.EXPECT().SetWorkingDirectory(gomock.Any()).AnyTimes()   // not tested here
 
