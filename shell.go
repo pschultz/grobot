@@ -50,6 +50,8 @@ func Execute(format string, args ...interface{}) string {
 	log.Shell(cmdLine)
 	output, err := ShellProvider.Execute(cmdLine, false)
 	if err != nil {
+		log.Error("Output from shell:")
+		log.Print(output)
 		panic(err)
 	}
 	return strings.TrimSpace(output)
