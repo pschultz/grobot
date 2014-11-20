@@ -23,7 +23,7 @@ var _ = Describe("Install tasks (new package)", func() {
 	BeforeEach(func() {
 		mockCtrl = gomock.NewController(GinkgoT())
 		shell, fileSystem, httpClient = SetupTestEnvironment(mockCtrl)
-		AssertFileWithContentExists(grobot.DefaultConfigFileName, `{
+		AssertFileWithContentExists(grobot.ConfigFileName, `{
 			"bot-version": "0.7",
 			"foo": {
 				"bar": "blup"
@@ -33,7 +33,7 @@ var _ = Describe("Install tasks (new package)", func() {
 			}
 		}`, AnyTime, fileSystem)
 
-		err := grobot.LoadConfigFromFile(grobot.DefaultConfigFileName, grobot.NewVersion("0.7"))
+		err := grobot.LoadConfigFromFile(grobot.ConfigFileName, grobot.NewVersion("0.7"))
 		Expect(err).NotTo(HaveOccurred())
 		module = grobot.GetModule("Depenency").(*dependency.Module)
 	})
@@ -67,7 +67,7 @@ var _ = Describe("Install tasks (new package)", func() {
 				]
 			}`
 			fileSystem.EXPECT().WriteFile(dependency.LockFileName, EqualJsonString(expectedLockFileContent))
-			fileSystem.EXPECT().WriteFile(grobot.DefaultConfigFileName, gomock.Any()) // this is tested separately
+			fileSystem.EXPECT().WriteFile(grobot.ConfigFileName, gomock.Any()) // this is tested separately
 
 			task := dependency.NewInstallTask(module)
 			_, err := task.Invoke("install", "code.google.com/p/gomock")
@@ -133,7 +133,7 @@ var _ = Describe("Install tasks (new package)", func() {
 				]
 			}`
 			fileSystem.EXPECT().WriteFile(dependency.LockFileName, EqualJsonString(expectedLockFileContent))
-			fileSystem.EXPECT().WriteFile(grobot.DefaultConfigFileName, gomock.Any()) // this is tested separately
+			fileSystem.EXPECT().WriteFile(grobot.ConfigFileName, gomock.Any()) // this is tested separately
 
 			task := dependency.NewInstallTask(module)
 			_, err := task.Invoke("install", "code.google.com/p/gomock")
@@ -166,7 +166,7 @@ var _ = Describe("Install tasks (new package)", func() {
 				}
 			}`
 		fileSystem.EXPECT().WriteFile(dependency.LockFileName, gomock.Any()) // not tested here
-		fileSystem.EXPECT().WriteFile(grobot.DefaultConfigFileName, EqualJsonString(expectedConfigFileContent))
+		fileSystem.EXPECT().WriteFile(grobot.ConfigFileName, EqualJsonString(expectedConfigFileContent))
 
 		task := dependency.NewInstallTask(module)
 		_, err := task.Invoke("install", "code.google.com/p/gomock")

@@ -18,7 +18,6 @@ import (
 var BotVersion = grobot.NewVersion("0.7")
 
 var debug = flag.Bool("debug", false, "show a lot more debug information on the tasks")
-var configFile = flag.String("config", grobot.DefaultConfigFileName, "set the used config file")
 var showTasks = flag.Bool("t", false, "Display available tasks with descriptions, then exit.")
 var showVersion = flag.Bool("version", false, "Display the current version of bot, then exit.")
 var showHelp = flag.Bool("help", false, "Display this help, then exit.")
@@ -81,22 +80,19 @@ func showHelpText() {
 	log.Print(``)
 	log.Print(`Which tasks are available depends on the used configuration file.`)
 	log.Print(``)
-	log.Print(`<strong>The following tasks are available with the default configuration file (%s):</strong>`, grobot.DefaultConfigFileName)
+	log.Print(`<strong>The following tasks are available with the default configuration file (%s):</strong>`, grobot.ConfigFileName)
 	grobot.PrintTasks()
 	log.Print(``)
 }
 
 func loadConfigurationFile() {
-	if *configFile == grobot.DefaultConfigFileName {
-		file := grobot.TargetInfo(*configFile)
-		if file.ExistingFile == false {
-			log.Debug("Default configuration file %S does not exist", grobot.DefaultConfigFileName)
-			grobot.LoadBuiltinConfig()
-			return
-		}
+	if grobot.FileExists(grobot.ConfigFileName) == false {
+		log.Debug("Default configuration file %S does not exist", grobot.ConfigFileName)
+		grobot.LoadBuiltinConfig()
+		return
 	}
 
-	if err := grobot.LoadConfigFromFile(*configFile, BotVersion); err != nil {
+	if err := grobot.LoadConfigFromFile(grobot.ConfigFileName, BotVersion); err != nil {
 		log.Fatal(err.Error())
 	}
 }

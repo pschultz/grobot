@@ -6,14 +6,13 @@ import (
 	"github.com/fgrosse/grobot/log"
 )
 
-const DefaultConfigFileName = "bot.json"
+const ConfigFileName = "bot.json"
 
 var (
 	isDebug       = false
 	defaultConfig = Configuration{
 		Version:          NewVersion("none"),
 		RawModuleConfigs: map[string]*json.RawMessage{},
-		fileName:         DefaultConfigFileName,
 	}
 	currentConfig *Configuration
 )
@@ -66,10 +65,6 @@ func (c *Configuration) MarshalJSON() ([]byte, error) {
 func (c *Configuration) Get(field string) (raw *json.RawMessage, exists bool) {
 	raw, exists = c.RawModuleConfigs[field]
 	return
-}
-
-func (c *Configuration) FileName() string {
-	return c.fileName
 }
 
 func LoadConfigFromFile(confFilePath string, currentVersion *Version) error {

@@ -71,13 +71,11 @@ func (t *InstallTask) updateLockFile(packageName, installedVersion string, lockF
 }
 
 func (t *InstallTask) addNewDependencyToConfiguration(packageName string) error {
-	botConfig := grobot.CurrentConfig()
-	configFileName := botConfig.FileName()
 	moduleConfig := t.module.conf
-	log.Debug("Adding new dependency %S to configuration file %S", packageName, configFileName)
+	log.Debug("Adding new dependency %S to configuration file %S", packageName, grobot.ConfigFileName)
 
 	if isPackageAlreadyExistentInConfiguration(packageName, moduleConfig) {
-		return fmt.Errorf("Package dependency %s is already existing in configuration file %s", packageName, configFileName)
+		return fmt.Errorf("Package dependency %s is already existing in configuration file %s", packageName, grobot.ConfigFileName)
 	}
 
 	moduleConfig.Packages = append(moduleConfig.Packages, &PackageConfigDefinition{
@@ -87,14 +85,15 @@ func (t *InstallTask) addNewDependencyToConfiguration(packageName string) error 
 	})
 	moduleConfigBytes, err := json.Marshal(moduleConfig)
 	moduleConfigRaw := json.RawMessage(moduleConfigBytes)
+	botConfig := grobot.CurrentConfig()
 	botConfig.RawModuleConfigs[moduleConfigKey] = &moduleConfigRaw
 
 	data, err := json.MarshalIndent(botConfig, "", "    ")
 	if err != nil {
-		return fmt.Errorf("Could not write configuration %s : %s", configFileName, err.Error())
+		return fmt.Errorf("Could not write configuration %s : %s", grobot.ConfigFileName, err.Error())
 	}
 
-	return grobot.WriteFile(configFileName, data)
+	return grobot.WriteFile(grobot.ConfigFileName, data)
 }
 
 func isPackageAlreadyExistentInConfiguration(packageName string, config *Configuration) bool {
