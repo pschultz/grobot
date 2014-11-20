@@ -13,6 +13,7 @@ type Version struct {
 	raw    string
 	Major  int
 	Minor  int
+	Patch  int
 	Branch string
 }
 
@@ -36,20 +37,20 @@ func (v *Version) MarshalJSON() ([]byte, error) {
 }
 
 func (v *Version) parse() (err error) {
+	v.Major = 0
+	v.Minor = 0
+	v.Patch = 0
+
 	if v.raw == NoVersion.raw {
-		v.Major = 0
-		v.Minor = 0
 		return nil
 	}
 
 	if strings.HasPrefix(v.raw, "branch:") {
-		v.Major = 0
-		v.Minor = 0
 		v.Branch = v.raw[7:]
 		return nil
 	}
 
-	versionParts := strings.SplitN(v.raw, ".", 2)
+	versionParts := strings.SplitN(v.raw, ".", 3)
 	v.Major, err = strconv.Atoi(versionParts[0])
 	if err != nil {
 		return fmt.Errorf("Could not parse major version from %s : %s", v.raw, err.Error())
@@ -62,15 +63,28 @@ func (v *Version) parse() (err error) {
 		}
 	}
 
+	if len(versionParts) > 2 {
+		v.Patch, err = strconv.Atoi(versionParts[2])
+		if err != nil {
+			return fmt.Errorf("Could not parse patch version from %s : %s", v.raw, err.Error())
+		}
+	}
+
 	return nil
 }
 
 func (v *Version) String() string {
-	return v.raw
+	if v.Branch != "" || (v.Major == 0 && v.Minor == 0 && v.Patch == 0) {
+		return v.raw
+	}
+	return fmt.Sprintf("%d.%d.%d", v.Major, v.Minor, v.Patch)
 }
 
 func (v *Version) GreaterThen(other *Version) bool {
 	if v.Major == other.Major {
+		if v.Minor == other.Minor {
+			return v.Patch > other.Patch
+		}
 		return v.Minor > other.Minor
 	}
 	return v.Major > other.Major
