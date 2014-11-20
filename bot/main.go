@@ -92,7 +92,7 @@ func loadConfigurationFile() {
 		return
 	}
 
-	if err := grobot.LoadConfigFromFile(grobot.ConfigFileName, BotVersion); err != nil {
+	if _, err := grobot.LoadConfigFromFile(grobot.ConfigFileName, BotVersion); err != nil {
 		log.Fatal(err.Error())
 	}
 }

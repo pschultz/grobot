@@ -58,7 +58,7 @@ var _ = Describe("Configuration", func() {
 		AssertFileWithContentExists(configFilePath, `{ "bot-version": "1.23" }`, AnyTime, fileSystem)
 		currentVersion := grobot.NewVersion("0.5")
 
-		err := grobot.LoadConfigFromFile(configFilePath, currentVersion)
+		_, err := grobot.LoadConfigFromFile(configFilePath, currentVersion)
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(Equal(fmt.Sprintf(`Error while read configuration file %s : The minimum required bot version is "1.23" but you are running bot version "0.5"`, configFilePath)))
 

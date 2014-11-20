@@ -66,26 +66,26 @@ func (c *Configuration) Get(field string) (raw *json.RawMessage, exists bool) {
 	return
 }
 
-func LoadConfigFromFile(confFilePath string, currentVersion *Version) error {
+func LoadConfigFromFile(confFilePath string, currentVersion *Version) (*Configuration, error) {
 	log.Debug("Loading configuration from file '%s'", confFilePath)
 	data, err := ReadFile(confFilePath)
 	if err != nil {
-		return fmt.Errorf("Could not read configuration : %s", err.Error())
+		return nil, fmt.Errorf("Could not read configuration : %s", err.Error())
 	}
 
 	config := new(Configuration)
 	config.fileName = confFilePath
 	err = json.Unmarshal(data, config)
 	if err != nil {
-		return fmt.Errorf("Error while unmarshalling configuration file '%s' : %s", confFilePath, err.Error())
+		return nil, fmt.Errorf("Error while unmarshalling configuration file '%s' : %s", confFilePath, err.Error())
 	}
 
 	if config.Version.GreaterThen(currentVersion) {
-		return fmt.Errorf(`Error while read configuration file %s : The minimum required bot version is "%s" but you are running bot version "%s"`, confFilePath, config.Version.String(), currentVersion.String())
+		return nil, fmt.Errorf(`Error while read configuration file %s : The minimum required bot version is "%s" but you are running bot version "%s"`, confFilePath, config.Version.String(), currentVersion.String())
 	}
 
 	loadModules(config)
-	return nil
+	return config, nil
 }
 
 func LoadBuiltinConfig() {

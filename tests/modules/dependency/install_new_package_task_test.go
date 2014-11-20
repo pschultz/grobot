@@ -33,7 +33,7 @@ var _ = Describe("Install tasks (new package)", func() {
 			}
 		}`, AnyTime, fileSystem)
 
-		err := grobot.LoadConfigFromFile(grobot.ConfigFileName, grobot.NewVersion("0.7"))
+		_, err := grobot.LoadConfigFromFile(grobot.ConfigFileName, grobot.NewVersion("0.7"))
 		Expect(err).NotTo(HaveOccurred())
 		module = grobot.GetModule("Depenency").(*dependency.Module)
 	})
