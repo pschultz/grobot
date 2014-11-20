@@ -41,6 +41,16 @@ func (t *Target) Typ() string {
 	return "file"
 }
 
+func FileExists(path string) bool {
+	targetInfo := TargetInfo(path)
+	return targetInfo.ExistingFile
+}
+
+func DirectoryExists(path string) bool {
+	targetInfo := TargetInfo(path)
+	return targetInfo.ExistingFile && targetInfo.IsDir
+}
+
 func TargetInfo(path string) *Target {
 	targetInfo, err := FileSystemProvider.TargetInfo(path)
 	if err != nil {

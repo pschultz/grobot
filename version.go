@@ -7,10 +7,13 @@ import (
 	"strings"
 )
 
+var NoVersion = &Version{raw: "none"}
+
 type Version struct {
-	raw   string
-	Major int
-	Minor int
+	raw    string
+	Major  int
+	Minor  int
+	Branch string
 }
 
 func NewVersion(raw string) *Version {
@@ -28,10 +31,21 @@ func (v *Version) UnmarshalJSON(b []byte) error {
 	return v.parse()
 }
 
+func (v *Version) MarshalJSON() ([]byte, error) {
+	return json.Marshal(v.raw)
+}
+
 func (v *Version) parse() (err error) {
-	if v.raw == "none" {
+	if v.raw == NoVersion.raw {
 		v.Major = 0
 		v.Minor = 0
+		return nil
+	}
+
+	if strings.HasPrefix(v.raw, "branch:") {
+		v.Major = 0
+		v.Minor = 0
+		v.Branch = v.raw[7:]
 		return nil
 	}
 

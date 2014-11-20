@@ -69,7 +69,7 @@ func (m *EqualJsonMatcher) Matches(actual interface{}) (success bool) {
 	if reflect.DeepEqual(m.Expected, parsedObject) {
 		return true
 	} else {
-		log.Debug("Expected\n%#v\nto equal\n%#v", m.Expected, parsedObject)
+		log.Debug("Expected\n%#v\nto equal\n%#v", parsedObject, m.Expected)
 		return false
 	}
 }
