@@ -31,8 +31,8 @@ func main() {
 		log.Debug("Running in grobot debug mode")
 	}
 
-	parseOutputFlags()
 	loadConfigurationFile()
+	parseOutputFlags()
 	invokeTask()
 }
 
