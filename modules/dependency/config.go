@@ -7,6 +7,7 @@ const moduleConfigKey = "dependency"
 type Configuration struct {
 	VendorsFolder string                     `json:"folder"`
 	Packages      []*PackageConfigDefinition `json:"packages"`
+	globalConfig  *grobot.Configuration
 }
 
 var defaultConfig = &Configuration{

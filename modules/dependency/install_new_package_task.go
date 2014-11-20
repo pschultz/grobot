@@ -85,7 +85,7 @@ func (t *InstallTask) addNewDependencyToConfiguration(packageName string) error 
 	})
 	moduleConfigBytes, err := json.Marshal(moduleConfig)
 	moduleConfigRaw := json.RawMessage(moduleConfigBytes)
-	botConfig := grobot.CurrentConfig()
+	botConfig := moduleConfig.globalConfig
 	botConfig.RawModuleConfigs[moduleConfigKey] = &moduleConfigRaw
 
 	data, err := json.MarshalIndent(botConfig, "", "    ")

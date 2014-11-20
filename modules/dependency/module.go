@@ -39,6 +39,7 @@ func (m *Module) LoadConfiguration(config *grobot.Configuration) error {
 	}
 
 	log.Debug("Using vendors folder '%s'", m.conf.VendorsFolder)
+	m.conf.globalConfig = config
 	m.registerTasks()
 	return nil
 }

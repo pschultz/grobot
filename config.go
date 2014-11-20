@@ -14,7 +14,6 @@ var (
 		Version:          NewVersion("none"),
 		RawModuleConfigs: map[string]*json.RawMessage{},
 	}
-	currentConfig *Configuration
 )
 
 func EnableDebugMode() {
@@ -74,18 +73,18 @@ func LoadConfigFromFile(confFilePath string, currentVersion *Version) error {
 		return fmt.Errorf("Could not read configuration : %s", err.Error())
 	}
 
-	currentConfig = new(Configuration)
-	currentConfig.fileName = confFilePath
-	err = json.Unmarshal(data, currentConfig)
+	config := new(Configuration)
+	config.fileName = confFilePath
+	err = json.Unmarshal(data, config)
 	if err != nil {
 		return fmt.Errorf("Error while unmarshalling configuration file '%s' : %s", confFilePath, err.Error())
 	}
 
-	if currentConfig.Version.GreaterThen(currentVersion) {
-		return fmt.Errorf(`Error while read configuration file %s : The minimum required bot version is "%s" but you are running bot version "%s"`, confFilePath, currentConfig.Version.String(), currentVersion.String())
+	if config.Version.GreaterThen(currentVersion) {
+		return fmt.Errorf(`Error while read configuration file %s : The minimum required bot version is "%s" but you are running bot version "%s"`, confFilePath, config.Version.String(), currentVersion.String())
 	}
 
-	loadModules(currentConfig)
+	loadModules(config)
 	return nil
 }
 
@@ -103,11 +102,4 @@ func loadModules(config *Configuration) {
 		}
 		log.Debug("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 	}
-}
-
-func CurrentConfig() *Configuration {
-	if currentConfig == nil {
-		currentConfig = &defaultConfig
-	}
-	return currentConfig
 }
