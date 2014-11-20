@@ -14,7 +14,7 @@ import (
 
 var _ = Describe("Configuration", func() {
 	configData := []byte(`{
-		"version": "0.6",
+		"bot-version": "0.6",
 		"ginkgo": {
 			"folder": "tests"
 		}
@@ -55,7 +55,7 @@ var _ = Describe("Configuration", func() {
 		fileSystem := NewMockFileSystem(mockCtrl)
 		grobot.FileSystemProvider = fileSystem
 		configFilePath := "test-config.json"
-		AssertFileWithContentExists(configFilePath, `{ "version": "1.23" }`, AnyTime, fileSystem)
+		AssertFileWithContentExists(configFilePath, `{ "bot-version": "1.23" }`, AnyTime, fileSystem)
 		currentVersion := grobot.NewVersion("0.5")
 
 		err := grobot.LoadConfigFromFile(configFilePath, currentVersion)

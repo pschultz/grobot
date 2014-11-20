@@ -22,14 +22,14 @@ func IsDebugMode() bool {
 }
 
 type Configuration struct {
-	Version          *Version `json:"version"`
+	Version          *Version `json:"bot-version"`
 	RawModuleConfigs map[string]*json.RawMessage
 }
 
 func (c *Configuration) UnmarshalJSON(b []byte) error {
 	err := json.Unmarshal(b, &c.RawModuleConfigs)
-	if version, versionIsDefined := c.RawModuleConfigs["version"]; versionIsDefined {
-		delete(c.RawModuleConfigs, "version")
+	if version, versionIsDefined := c.RawModuleConfigs["bot-version"]; versionIsDefined {
+		delete(c.RawModuleConfigs, "bot-version")
 		c.Version = new(Version)
 		err = json.Unmarshal(*version, c.Version)
 	} else {

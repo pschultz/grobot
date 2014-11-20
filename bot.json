@@ -1,5 +1,5 @@
 {
-    "version": "0.7",
+    "bot-version": "0.7",
     "gomock": {
         "folder": "tests/mocks",
         "package": "mocks",
