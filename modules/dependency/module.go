@@ -14,34 +14,44 @@ func init() {
 }
 
 type Module struct {
-	conf Configuration
+	conf *Configuration
+}
+
+func NewModule() *Module {
+	return &Module{conf: defaultConfig}
 }
 
 func (m *Module) Name() string {
 	return "Depenency"
 }
 
+func (m *Module) BotVersion() *grobot.Version {
+	if m.conf == nil || m.conf.globalConfig == nil {
+		return grobot.NoVersion
+	}
+
+	return m.conf.globalConfig.Version
+}
+
 func (m *Module) LoadConfiguration(config *grobot.Configuration) error {
-	data, keyExists := config.Get("dependency")
+	data, keyExists := config.Get(moduleConfigKey)
 	if keyExists == false {
 		log.Debug("Using default config")
 		m.conf = defaultConfig
 	} else {
-		var newConfig Configuration
-		err := json.Unmarshal(*data, &newConfig)
+		m.conf = new(Configuration)
+		err := json.Unmarshal(*data, m.conf)
 		if err != nil {
-			return fmt.Errorf("could not parse configuration key 'dependency' : %s", err.Error())
+			return fmt.Errorf("could not parse configuration key '%s' : %s", moduleConfigKey, err.Error())
 		}
-
-		m.conf = newConfig
 	}
 
-	log.Debug("Using vendors folder '%s'", m.conf.VendorsFolder)
+	m.conf.globalConfig = config
 	m.registerTasks()
 	return nil
 }
 
 func (m *Module) registerTasks() {
-	grobot.RegisterTask("install", NewInstallTask())
+	grobot.RegisterTask("install", NewInstallTask(m))
 	grobot.RegisterTask("update", NewUpdateTask())
 }

@@ -6,11 +6,15 @@ import (
 	"github.com/fgrosse/grobot/log"
 )
 
-var isDebug = false
+const ConfigFileName = "bot.json"
 
-var defaultConfig = Configuration{
-	Version: NewVersion("none"),
-}
+var (
+	isDebug       = false
+	defaultConfig = Configuration{
+		Version:          NewVersion("none"),
+		RawModuleConfigs: map[string]*json.RawMessage{},
+	}
+)
 
 func EnableDebugMode() {
 	isDebug = true
@@ -22,21 +26,39 @@ func IsDebugMode() bool {
 }
 
 type Configuration struct {
-	Version          *Version `json:"version"`
+	Version          *Version `json:"bot-version"`
 	RawModuleConfigs map[string]*json.RawMessage
+	fileName         string
 }
 
 func (c *Configuration) UnmarshalJSON(b []byte) error {
 	err := json.Unmarshal(b, &c.RawModuleConfigs)
-	if version, versionIsDefined := c.RawModuleConfigs["version"]; versionIsDefined {
-		delete(c.RawModuleConfigs, "version")
+	if version, versionIsDefined := c.RawModuleConfigs["bot-version"]; versionIsDefined {
+		delete(c.RawModuleConfigs, "bot-version")
 		c.Version = new(Version)
 		err = json.Unmarshal(*version, c.Version)
 	} else {
-		c.Version = NewVersion("none")
+		c.Version = NoVersion
 	}
 
 	return err
+}
+
+func (c *Configuration) MarshalJSON() ([]byte, error) {
+	data := c.RawModuleConfigs
+	if data == nil {
+		data = map[string]*json.RawMessage{}
+	}
+
+	if c.Version != NoVersion {
+		v, err := json.Marshal(c.Version)
+		if err != nil {
+			return []byte{}, err
+		}
+		rawVersion := json.RawMessage(v)
+		data["bot-version"] = &rawVersion
+	}
+	return json.Marshal(data)
 }
 
 func (c *Configuration) Get(field string) (raw *json.RawMessage, exists bool) {
@@ -44,25 +66,28 @@ func (c *Configuration) Get(field string) (raw *json.RawMessage, exists bool) {
 	return
 }
 
-func LoadConfigFromFile(confFilePath string, currentVersion *Version) error {
+// LoadConfigFromFile loads a bot configuration from the given file and initializes all modules
+// with this configuration.
+func LoadConfigFromFile(confFilePath string, currentVersion *Version) (*Configuration, error) {
 	log.Debug("Loading configuration from file '%s'", confFilePath)
 	data, err := ReadFile(confFilePath)
 	if err != nil {
-		return fmt.Errorf("Could not read configuration : %s", err.Error())
+		return nil, fmt.Errorf("Could not read configuration : %s", err.Error())
 	}
 
-	var config Configuration
-	err = json.Unmarshal(data, &config)
+	config := new(Configuration)
+	config.fileName = confFilePath
+	err = json.Unmarshal(data, config)
 	if err != nil {
-		return fmt.Errorf("Error while unmarshalling configuration file '%s' : %s", confFilePath, err.Error())
+		return nil, fmt.Errorf("Error while unmarshalling configuration file '%s' : %s", confFilePath, err.Error())
 	}
 
 	if config.Version.GreaterThen(currentVersion) {
-		return fmt.Errorf(`Error while read configuration file %s : The minimum required bot version is "%s" but you are running bot version "%s"`, confFilePath, config.Version.String(), currentVersion.String())
+		return nil, fmt.Errorf(`Error while read configuration file %s : The minimum required bot version is "%s" but you are running bot version "%s"`, confFilePath, config.Version.String(), currentVersion.String())
 	}
 
-	loadModules(&config)
-	return nil
+	loadModules(config)
+	return config, nil
 }
 
 func LoadBuiltinConfig() {

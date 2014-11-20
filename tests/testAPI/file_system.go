@@ -31,6 +31,12 @@ func AssertFileDoesNotExist(path string, fileSystem *mocks.MockFileSystem) {
 	fileSystem.EXPECT().TargetInfo(path).Return(&targetInfo, nil).AnyTimes()
 }
 
+func AssertDirectoryDoesNotExist(path string, fileSystem *mocks.MockFileSystem) {
+	log.Debug(">> Asserting directory [%s] does not exist", path)
+	targetInfo := grobot.Target{ExistingFile: false}
+	fileSystem.EXPECT().TargetInfo(path).Return(&targetInfo, nil).AnyTimes()
+}
+
 func AssertNoFiles(fileSystem *mocks.MockFileSystem, args ...string) {
 	for _, arg := range args {
 		AssertFileDoesNotExist(arg, fileSystem)
@@ -47,4 +53,10 @@ func AssertFileWithContentExists(path, content string, modTime time.Time, fileSy
 	targetInfo := grobot.Target{ExistingFile: true, IsDir: false, ModificationTime: modTime}
 	fileSystem.EXPECT().TargetInfo(path).Return(&targetInfo, nil).AnyTimes()
 	fileSystem.EXPECT().ReadFile(path).Return([]byte(content), nil)
+}
+
+func AssertPackageHasNoDependencies(packageName string, fileSystem *mocks.MockFileSystem) {
+	vendorDir := "vendor/src/" + packageName
+	AssertDirectoryDoesNotExist(vendorDir, fileSystem)
+	AssertFileDoesNotExist(vendorDir+"/"+grobot.ConfigFileName, fileSystem)
 }

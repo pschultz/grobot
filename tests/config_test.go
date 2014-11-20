@@ -14,11 +14,11 @@ import (
 
 var _ = Describe("Configuration", func() {
 	configData := []byte(`{
-		"version": "0.6",
-		"ginkgo": {
-			"folder": "tests"
-		}
-	}`)
+        "bot-version": "0.6",
+        "ginkgo": {
+            "folder": "tests"
+        }
+    }`)
 
 	It("should unmarshal the configuration version", func() {
 		var conf grobot.Configuration
@@ -43,8 +43,8 @@ var _ = Describe("Configuration", func() {
 		rawConf, exists := conf.Get("ginkgo")
 		Expect(exists).To(BeTrue())
 		Expect(string(*rawConf)).To(Equal(string(`{
-			"folder": "tests"
-		}`)))
+            "folder": "tests"
+        }`)))
 
 		_, exists = conf.Get("foobar")
 		Expect(exists).To(BeFalse())
@@ -55,14 +55,25 @@ var _ = Describe("Configuration", func() {
 		fileSystem := NewMockFileSystem(mockCtrl)
 		grobot.FileSystemProvider = fileSystem
 		configFilePath := "test-config.json"
-		AssertFileWithContentExists(configFilePath, `{ "version": "1.23" }`, AnyTime, fileSystem)
+		AssertFileWithContentExists(configFilePath, `{ "bot-version": "1.23" }`, AnyTime, fileSystem)
 		currentVersion := grobot.NewVersion("0.5")
 
-		err := grobot.LoadConfigFromFile(configFilePath, currentVersion)
+		_, err := grobot.LoadConfigFromFile(configFilePath, currentVersion)
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(Equal(fmt.Sprintf(`Error while read configuration file %s : The minimum required bot version is "1.23" but you are running bot version "0.5"`, configFilePath)))
 
 		grobot.Reset()
 		mockCtrl.Finish()
+	})
+
+	It("should marshal into the correct JSON", func() {
+		var conf grobot.Configuration
+		err := json.Unmarshal(configData, &conf)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(conf.Version.String()).To(Equal("0.6"))
+
+		data, err := json.MarshalIndent(&conf, "    ", "    ")
+		Expect(err).NotTo(HaveOccurred())
+		Expect(string(data)).To(Equal(string(configData)))
 	})
 })

@@ -69,4 +69,36 @@ var _ = Describe("Update tasks", func() {
 		_, err := task.Invoke("update", "code.google.com/p/foo")
 		Expect(err).NotTo(HaveOccurred())
 	})
+
+	Context("Autocompletion", func() {
+		It("should autocomplete package name if only one installed package matches the name", func() {
+			existingLockFileContent := `{
+				"packages": [
+					{
+						"name": "code.google.com/p/foo",
+						"source": {
+							"type": "git",
+							"version": "8798645651468468464654684684fff"
+						}
+					}
+				]
+			}`
+			AssertFileWithContentExists(dependency.LockFileName, existingLockFileContent, AnyTime, fileSystem)
+
+			vendorDir := "vendor/src/code.google.com/p/foo"
+			AssertFileExists(vendorDir, AnyTime, fileSystem)
+
+			gomock.InOrder(
+				shell.EXPECT().SetWorkingDirectory(vendorDir),
+				shell.EXPECT().Execute("git checkout master --quiet", true),
+				shell.EXPECT().Execute("git pull", true),
+				shell.EXPECT().Execute("git rev-parse HEAD", true).Return("8798645651468468464654684684fff", nil),
+				shell.EXPECT().SetWorkingDirectory(""),
+			)
+
+			task := dependency.NewUpdateTask()
+			_, err := task.Invoke("update", "foo")
+			Expect(err).NotTo(HaveOccurred())
+		})
+	})
 })

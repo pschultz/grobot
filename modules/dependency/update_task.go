@@ -39,9 +39,10 @@ func updatePackage(packageName string, lockFile *LockFile) (bool, error) {
 
 	packageInLockFile := lockFile.Package(packageName)
 	if packageInLockFile == nil {
-		return false, fmt.Errorf("Package %S is not contained in the lockfile %S", packageName, LockFileName)
+		return false, fmt.Errorf("Package %s is not contained in the lockfile %s", packageName, LockFileName)
 	}
 
+	packageName = packageInLockFile.Name
 	vendorDir := getInstallDestination(packageName)
 	oldVersion := packageInLockFile.Source.Version
 
@@ -51,7 +52,13 @@ func updatePackage(packageName string, lockFile *LockFile) (bool, error) {
 	newVersion := grobot.ExecuteSilent("git rev-parse HEAD")
 	grobot.ResetWorkingDirectory()
 
-	packageInLockFile.Source.Version = newVersion
-	err := writeLockFile(lockFile)
-	return err == nil && newVersion != oldVersion, err
+	if newVersion == oldVersion {
+		log.Print("  Package allready up to date..")
+		return false, nil
+	} else {
+		log.Print("  Installed new version %S", newVersion)
+		packageInLockFile.Source.Version = newVersion
+		err := writeLockFile(lockFile)
+		return err == nil, err
+	}
 }

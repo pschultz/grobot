@@ -19,12 +19,29 @@ var _ = Describe("Version", func() {
 		Expect(version.Minor).To(Equal(6))
 	})
 
+	It("should marshal into the raw format", func() {
+		version := grobot.NewVersion("0.6")
+		data, err := json.Marshal(version)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(string(data)).To(Equal(`"0.6"`))
+	})
+
 	It("should unmarshable from JSON when the `none` alias is used", func() {
 		var version grobot.Version
 		data := []byte(`"none"`)
 		err := json.Unmarshal(data, &version)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(version.String()).To(Equal("none"))
+		Expect(version.Major).To(Equal(0))
+		Expect(version.Minor).To(Equal(0))
+	})
+
+	It("should unmarshable from JSON when a branch is given", func() {
+		var version grobot.Version
+		data := []byte(`"branch:foo"`)
+		err := json.Unmarshal(data, &version)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(version.String()).To(Equal("branch:foo"))
 		Expect(version.Major).To(Equal(0))
 		Expect(version.Minor).To(Equal(0))
 	})
@@ -63,6 +80,16 @@ var _ = Describe("Version", func() {
 
 			Expect(higherVersion.LowerThen(lowerVersion)).To(BeFalse())
 			Expect(lowerVersion.LowerThen(higherVersion)).To(BeTrue())
+		})
+
+		// NOTE: this might not be final
+		It("should return fals when comparing branch versions", func() {
+			version1 := grobot.NewVersion("branch:foo")
+			version2 := grobot.NewVersion("branch:bar")
+			Expect(version1.GreaterThen(version2)).To(BeFalse())
+			Expect(version2.GreaterThen(version1)).To(BeFalse())
+			Expect(version1.LowerThen(version2)).To(BeFalse())
+			Expect(version2.LowerThen(version1)).To(BeFalse())
 		})
 	})
 })

@@ -6,6 +6,7 @@ import (
 
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 type LockFile struct {
@@ -36,8 +37,8 @@ func loadLockFile() (*LockFile, error) {
 	targetInfo := grobot.TargetInfo(LockFileName)
 
 	if targetInfo.ExistingFile == false {
-		log.Print("Lock file %S does not exist", LockFileName)
-		return nil, nil
+		log.Debug("Lock file %S does not yet exist", LockFileName)
+		return &LockFile{[]*PackageDefinition{}}, nil
 	}
 
 	log.Debug("Reading dependency lock file [<strong>%s</strong>]", LockFileName)
@@ -59,6 +60,7 @@ func loadLockFile() (*LockFile, error) {
 }
 
 func writeLockFile(lockFile *LockFile) error {
+	log.Debug("Writing lock file %S", LockFileName)
 	data, err := json.MarshalIndent(lockFile, "", "    ")
 	if err != nil {
 		return fmt.Errorf("Could not write lockfile %s : %s", LockFileName, err.Error())
@@ -68,10 +70,21 @@ func writeLockFile(lockFile *LockFile) error {
 }
 
 func (l *LockFile) Package(packageName string) *PackageDefinition {
+	matches := []*PackageDefinition{}
 	for _, p := range l.Packages {
 		if p.Name == packageName {
 			return p
 		}
+
+		if strings.Contains(p.Name, packageName) {
+			matches = append(matches, p)
+		}
 	}
+
+	if len(matches) == 1 {
+		log.Debug("Autocompleted package name %S to %S", packageName, matches[0].Name)
+		return matches[0]
+	}
+
 	return nil
 }
