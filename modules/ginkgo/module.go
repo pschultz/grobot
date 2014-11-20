@@ -41,7 +41,7 @@ func (m *Module) LoadConfiguration(config *grobot.Configuration) error {
 }
 
 func (m *Module) registerTasks() {
-	generic.RegisterVendorBin("ginkgo", "github.com/onsi/ginkgo/ginkgo")
+	generic.RegisterVendorBin("ginkgo", "github.com/onsi/ginkgo")
 	// TODO we probably also want gomega dependency
 	// go get github.com/onsi/gomega
 	grobot.RegisterTask(grobot.StandardTaskTest, NewTestTask(m.conf))

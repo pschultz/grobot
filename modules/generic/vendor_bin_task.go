@@ -8,10 +8,11 @@ import (
 
 type VendorBinTask struct {
 	sourcePath string
+	binName    string
 }
 
-func NewVendorBinTask(sourcePath string) *VendorBinTask {
-	return &VendorBinTask{"vendor/src/" + sourcePath}
+func NewVendorBinTask(sourcePath, binName string) *VendorBinTask {
+	return &VendorBinTask{"vendor/src/" + sourcePath, binName}
 }
 
 func (t *VendorBinTask) Dependencies(invokedName string) []string {
@@ -21,7 +22,7 @@ func (t *VendorBinTask) Dependencies(invokedName string) []string {
 func (t *VendorBinTask) Invoke(name string, args ...string) (bool, error) {
 	sourcePath := stripVendorSource(t.sourcePath)
 	log.Action("Compiling %s..", name)
-	grobot.Execute(`go build -o "%s" "%s"`, name, sourcePath)
+	grobot.Execute(`go build -o "%s" "%s/%s"`, name, sourcePath, t.binName)
 	return true, nil
 }
 
@@ -37,6 +38,6 @@ func stripVendorSource(path string) string {
 // Example:
 //   RegisterVendorBin("mockgen", "code.google.com/p/gomock/mockgen")
 func RegisterVendorBin(binName, sourceRepo string) {
-	grobot.RegisterTask("vendor/bin/"+binName, NewVendorBinTask(sourceRepo))
+	grobot.RegisterTask("vendor/bin/"+binName, NewVendorBinTask(sourceRepo, binName))
 	grobot.RegisterTask("vendor/src/"+sourceRepo, NewInstallDependencyTask(sourceRepo))
 }

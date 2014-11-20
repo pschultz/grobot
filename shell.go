@@ -50,8 +50,6 @@ func Execute(format string, args ...interface{}) string {
 	log.Shell(cmdLine)
 	output, err := ShellProvider.Execute(cmdLine, false)
 	if err != nil {
-		log.Error("Output from shell:")
-		log.Print(output)
 		panic(err)
 	}
 	return strings.TrimSpace(output)
@@ -102,6 +100,21 @@ func (s *SystemShell) Execute(cmdLine string, silent bool) (string, error) {
 	cmd.Dir = s.Dir
 
 	err := cmd.Run()
+	if err != nil {
+		errMessage := err.Error()
+		if silent {
+			errMessage := fmt.Sprintf("%s\n\n$ %s", errMessage, cmdLine)
+			stdOutMsg := stdOut.Output()
+			if strings.TrimSpace(stdOutMsg) != "" {
+				errMessage = fmt.Sprintf("%s\nOutput from std out: \n%s", errMessage, stdOutMsg)
+			}
+			stdErrMsg := stdErr.Output()
+			if strings.TrimSpace(stdErrMsg) != "" {
+				errMessage = fmt.Sprintf("%s\n\nOutput from std err: \n%s", errMessage, stdErrMsg)
+			}
+		}
+		err = fmt.Errorf(errMessage)
+	}
 	return stdOut.Output(), err
 }
 

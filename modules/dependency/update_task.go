@@ -35,13 +35,12 @@ func (t *UpdateTask) Invoke(invokedName string, args ...string) (bool, error) {
 }
 
 func updatePackage(packageName string, lockFile *LockFile) (bool, error) {
-	log.Action("Updating package %S", packageName)
-
 	packageInLockFile := lockFile.Package(packageName)
 	if packageInLockFile == nil {
 		return false, fmt.Errorf("Package %s is not contained in the lockfile %s", packageName, LockFileName)
 	}
 
+	log.Action("Updating package %S", packageInLockFile.Name)
 	packageName = packageInLockFile.Name
 	vendorDir := getInstallDestination(packageName)
 	oldVersion := packageInLockFile.Source.Version
