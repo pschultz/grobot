@@ -58,7 +58,7 @@ func panicHandler() {
 		var err error
 		switch caughtErr := r.(type) {
 		case error:
-			err = fmt.Errorf("Caught unexpected panic: %s", caughtErr.Error())
+			err = caughtErr
 		case string:
 			err = fmt.Errorf("Caught unexpected panic: %s", caughtErr)
 		default:

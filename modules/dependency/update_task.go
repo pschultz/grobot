@@ -50,7 +50,10 @@ func updateAllPackages(lockFile *LockFile) (bool, error) {
 		return false, nil
 	}
 
-	log.Action("Updating all packages")
+	if len(lockFile.Packages) >= 1 {
+		log.ActionMinor("Updating %d packages...", len(lockFile.Packages))
+	}
+
 	somePackageHasBeenUpdated := false
 	for _, p := range lockFile.Packages {
 		updated, err := updatePackage(p.Name, lockFile)

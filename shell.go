@@ -65,7 +65,7 @@ func ExecuteSilent(format string, args ...interface{}) string {
 	cmdLine := fmt.Sprintf(format, args...)
 	output, err := ShellProvider.Execute(cmdLine, true)
 	if err != nil {
-		panic(err)
+		panic(fmt.Errorf("Error from shell command: <strong>%s</strong>", err.Error()))
 	}
 	return strings.TrimSpace(output)
 }
@@ -101,21 +101,33 @@ func (s *SystemShell) Execute(cmdLine string, silent bool) (string, error) {
 
 	err := cmd.Run()
 	if err != nil {
-		errMessage := err.Error()
-		if silent {
-			errMessage := fmt.Sprintf("%s\n\n$ %s", errMessage, cmdLine)
-			stdOutMsg := stdOut.Output()
-			if strings.TrimSpace(stdOutMsg) != "" {
-				errMessage = fmt.Sprintf("%s\nOutput from std out: \n%s", errMessage, stdOutMsg)
-			}
-			stdErrMsg := stdErr.Output()
-			if strings.TrimSpace(stdErrMsg) != "" {
-				errMessage = fmt.Sprintf("%s\n\nOutput from std err: \n%s", errMessage, stdErrMsg)
-			}
-		}
-		err = fmt.Errorf(errMessage)
+		err = s.detailedError(err, cmdLine, silent, stdOut, stdErr)
 	}
 	return stdOut.Output(), err
+}
+
+func (s *SystemShell) detailedError(cause error, cmdLine string, silent bool, stdOut, stdErr *shellWriter) error {
+	errMessage := cause.Error()
+	if silent {
+		errMessage = fmt.Sprintf("%s\n\n<strong>Command</strong>:\n$ %s", errMessage, cmdLine)
+
+		pwd, _ := os.Getwd()
+		if s.Dir != "" {
+			pwd = pwd + "/" + s.Dir
+		}
+		errMessage = fmt.Sprintf("%s\n\n<strong>Working directory</strong>: \n%s", errMessage, pwd)
+
+		stdOutMsg := stdOut.Output()
+		if strings.TrimSpace(stdOutMsg) != "" {
+			errMessage = fmt.Sprintf("%s\n<strong>Output from std out</strong>: \n%s", errMessage, stdOutMsg)
+		}
+
+		stdErrMsg := stdErr.Output()
+		if strings.TrimSpace(stdErrMsg) != "" {
+			errMessage = fmt.Sprintf("%s\n\n<strong>Output from std err</strong>: \n%s", errMessage, stdErrMsg)
+		}
+	}
+	return fmt.Errorf(errMessage)
 }
 
 type shellWriter struct {
