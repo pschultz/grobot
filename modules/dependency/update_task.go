@@ -20,18 +20,47 @@ func (t *UpdateTask) Dependencies(string) []string {
 	return []string{}
 }
 
-func (t *UpdateTask) Invoke(invokedName string, args ...string) (bool, error) {
-	if len(args) == 0 {
-		return false, fmt.Errorf("No package name given. Please tell me the full name of the package to update")
-	}
-
+func (t *UpdateTask) Invoke(invokedName string, args ...string) (updated bool, err error) {
 	lockFile, err := loadLockFile()
 	if err != nil {
 		return false, err
 	}
 
-	packageName := args[0]
-	return updatePackage(packageName, lockFile)
+	if len(args) == 0 {
+		updated, err = updateAllPackages(lockFile)
+	} else {
+		packageName := args[0]
+		updated, err = updatePackage(packageName, lockFile)
+	}
+	if err != nil {
+		return false, err
+	}
+
+	if updated == false {
+		return false, nil
+	}
+
+	err = writeLockFile(lockFile)
+	return err == nil && updated, err
+}
+
+func updateAllPackages(lockFile *LockFile) (bool, error) {
+	if len(lockFile.Packages) == 0 {
+		log.Print("No packages found in lock file %S", LockFileName)
+		return false, nil
+	}
+
+	log.Action("Updating all packages")
+	somePackageHasBeenUpdated := false
+	for _, p := range lockFile.Packages {
+		updated, err := updatePackage(p.Name, lockFile)
+		if err != nil {
+			return somePackageHasBeenUpdated, err
+		}
+		somePackageHasBeenUpdated = somePackageHasBeenUpdated || updated
+	}
+
+	return somePackageHasBeenUpdated, nil
 }
 
 func updatePackage(packageName string, lockFile *LockFile) (bool, error) {
@@ -57,7 +86,6 @@ func updatePackage(packageName string, lockFile *LockFile) (bool, error) {
 	} else {
 		log.Print("  Installed new version %S", newVersion)
 		packageInLockFile.Source.Version = newVersion
-		err := writeLockFile(lockFile)
-		return err == nil, err
+		return true, nil
 	}
 }

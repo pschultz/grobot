@@ -70,6 +70,71 @@ var _ = Describe("Update tasks", func() {
 		Expect(err).NotTo(HaveOccurred())
 	})
 
+	It("should update all packages if no argument is given", func() {
+		existingLockFileContent := `{
+			"packages": [
+				{
+					"name": "code.google.com/p/foo",
+					"source": {
+						"type": "git",
+						"version": "foo_version"
+					}
+				},
+				{
+					"name": "code.google.com/p/bar",
+					"source": {
+						"type": "git",
+						"version": "bar_version"
+					}
+				}
+			]
+		}`
+		AssertFileWithContentExists(dependency.LockFileName, existingLockFileContent, AnyTime, fileSystem)
+
+		vendorDir1 := "vendor/src/code.google.com/p/foo"
+		AssertPackageHasNoDependencies("code.google.com/p/foo", fileSystem)
+		vendorDir2 := "vendor/src/code.google.com/p/bar"
+		AssertPackageHasNoDependencies("code.google.com/p/bar", fileSystem)
+
+		gomock.InOrder(
+			shell.EXPECT().SetWorkingDirectory(vendorDir1),
+			shell.EXPECT().Execute("git checkout master --quiet", true),
+			shell.EXPECT().Execute("git pull", true),
+			shell.EXPECT().Execute("git rev-parse HEAD", true).Return("foo_version_new", nil),
+			shell.EXPECT().SetWorkingDirectory(""),
+
+			shell.EXPECT().SetWorkingDirectory(vendorDir2),
+			shell.EXPECT().Execute("git checkout master --quiet", true),
+			shell.EXPECT().Execute("git pull", true),
+			shell.EXPECT().Execute("git rev-parse HEAD", true).Return("bar_version_new", nil),
+			shell.EXPECT().SetWorkingDirectory(""),
+		)
+
+		expectedLockFileContent := `{
+			"packages": [
+				{
+					"name": "code.google.com/p/foo",
+					"source": {
+						"type": "git",
+						"version": "foo_version_new"
+					}
+				},
+				{
+					"name": "code.google.com/p/bar",
+					"source": {
+						"type": "git",
+						"version": "bar_version_new"
+					}
+				}
+			]
+		}`
+		fileSystem.EXPECT().WriteFile(dependency.LockFileName, EqualJsonString(expectedLockFileContent))
+
+		task := dependency.NewUpdateTask()
+		_, err := task.Invoke("update")
+		Expect(err).NotTo(HaveOccurred())
+	})
+
 	Context("Autocompletion", func() {
 		It("should autocomplete package name if only one installed package matches the name", func() {
 			existingLockFileContent := `{
