@@ -80,7 +80,7 @@ func (v *Version) String() string {
 	return fmt.Sprintf("%d.%d.%d", v.Major, v.Minor, v.Patch)
 }
 
-func (v *Version) GreaterThen(other *Version) (bool, error) {
+func (v *Version) GreaterThan(other *Version) (bool, error) {
 	if v.Branch != "" {
 		if other.Branch == v.Branch {
 			return false, nil
@@ -97,6 +97,6 @@ func (v *Version) GreaterThen(other *Version) (bool, error) {
 	return v.Major > other.Major, nil
 }
 
-func (v *Version) LowerThen(other *Version) (bool, error) {
-	return other.GreaterThen(v)
+func (v *Version) LowerThan(other *Version) (bool, error) {
+	return other.GreaterThan(v)
 }

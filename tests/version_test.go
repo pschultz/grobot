@@ -80,47 +80,47 @@ var _ = Describe("Version", func() {
 	Context("comparing", func() {
 		It("should never be greater than the same version", func() {
 			version := grobot.NewVersion("0.7")
-			Expect(version.GreaterThen(version)).To(BeFalse())
+			Expect(version.GreaterThan(version)).To(BeFalse())
 		})
 
 		It("should be comparable to other versions with the same major and minor but different patch version", func() {
 			lowerVersion := grobot.NewVersion("0.2.7")
 			higherVersion := grobot.NewVersion("0.2.9")
-			Expect(higherVersion.GreaterThen(lowerVersion)).To(BeTrue())
-			Expect(lowerVersion.GreaterThen(higherVersion)).To(BeFalse())
+			Expect(higherVersion.GreaterThan(lowerVersion)).To(BeTrue())
+			Expect(lowerVersion.GreaterThan(higherVersion)).To(BeFalse())
 
-			Expect(higherVersion.LowerThen(lowerVersion)).To(BeFalse())
-			Expect(lowerVersion.LowerThen(higherVersion)).To(BeTrue())
+			Expect(higherVersion.LowerThan(lowerVersion)).To(BeFalse())
+			Expect(lowerVersion.LowerThan(higherVersion)).To(BeTrue())
 		})
 
 		It("should be comparable to other versions with the same major but different minor version", func() {
 			lowerVersion := grobot.NewVersion("0.7.9")
 			higherVersion := grobot.NewVersion("0.9.1")
-			Expect(higherVersion.GreaterThen(lowerVersion)).To(BeTrue())
-			Expect(lowerVersion.GreaterThen(higherVersion)).To(BeFalse())
+			Expect(higherVersion.GreaterThan(lowerVersion)).To(BeTrue())
+			Expect(lowerVersion.GreaterThan(higherVersion)).To(BeFalse())
 
-			Expect(higherVersion.LowerThen(lowerVersion)).To(BeFalse())
-			Expect(lowerVersion.LowerThen(higherVersion)).To(BeTrue())
+			Expect(higherVersion.LowerThan(lowerVersion)).To(BeFalse())
+			Expect(lowerVersion.LowerThan(higherVersion)).To(BeTrue())
 		})
 
 		It("should be comparable to other versions with the different major, minor and patch version", func() {
 			lowerVersion := grobot.NewVersion("1.5.9")
 			higherVersion := grobot.NewVersion("3.3.1")
-			Expect(higherVersion.GreaterThen(lowerVersion)).To(BeTrue())
-			Expect(lowerVersion.GreaterThen(higherVersion)).To(BeFalse())
+			Expect(higherVersion.GreaterThan(lowerVersion)).To(BeTrue())
+			Expect(lowerVersion.GreaterThan(higherVersion)).To(BeFalse())
 
-			Expect(higherVersion.LowerThen(lowerVersion)).To(BeFalse())
-			Expect(lowerVersion.LowerThen(higherVersion)).To(BeTrue())
+			Expect(higherVersion.LowerThan(lowerVersion)).To(BeFalse())
+			Expect(lowerVersion.LowerThan(higherVersion)).To(BeTrue())
 		})
 
 		It("should return an error when comparing different branch versions", func() {
 			version1 := grobot.NewVersion("branch:foo")
 			version2 := grobot.NewVersion("branch:bar")
 
-			_, err := version1.GreaterThen(version2)
+			_, err := version1.GreaterThan(version2)
 			Expect(err).To(HaveOccurred())
 
-			_, err = version2.GreaterThen(version1)
+			_, err = version2.GreaterThan(version1)
 			Expect(err).To(HaveOccurred())
 		})
 
@@ -128,11 +128,11 @@ var _ = Describe("Version", func() {
 			version1 := grobot.NewVersion("branch:foo")
 			version2 := grobot.NewVersion("branch:foo")
 
-			result, err := version1.GreaterThen(version2)
+			result, err := version1.GreaterThan(version2)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result).To(BeFalse())
 
-			result, err = version1.LowerThen(version2)
+			result, err = version1.LowerThan(version2)
 			Expect(result).To(BeFalse())
 		})
 	})

@@ -82,7 +82,7 @@ func LoadConfigFromFile(confFilePath string, currentVersion *Version) (*Configur
 		return nil, fmt.Errorf("Error while unmarshalling configuration file '%s' : %s", confFilePath, err.Error())
 	}
 
-	versionGreater, err := config.Version.GreaterThen(currentVersion)
+	versionGreater, err := config.Version.GreaterThan(currentVersion)
 	if err != nil {
 		return nil, fmt.Errorf(`Error while read configuration file %s : Could not compare the minimum required bot version "%s" with your running bot version "%s" : %s`, confFilePath, config.Version.String(), currentVersion.String(), err.Error())
 	}
