@@ -12,7 +12,7 @@ func init() {
 }
 
 type FileSystem interface {
-	TargetInfo(path string) (*Target, error)
+	FileInfo(path string) (*Target, error)
 	ReadFile(path string) ([]byte, error)
 	WriteFile(path string, data []byte) error
 }
@@ -42,17 +42,17 @@ func (t *Target) Typ() string {
 }
 
 func FileExists(path string) bool {
-	targetInfo := TargetInfo(path)
+	targetInfo := FileInfo(path)
 	return targetInfo.ExistingFile
 }
 
 func DirectoryExists(path string) bool {
-	targetInfo := TargetInfo(path)
+	targetInfo := FileInfo(path)
 	return targetInfo.ExistingFile && targetInfo.IsDir
 }
 
-func TargetInfo(path string) *Target {
-	targetInfo, err := FileSystemProvider.TargetInfo(path)
+func FileInfo(path string) *Target {
+	targetInfo, err := FileSystemProvider.FileInfo(path)
 	if err != nil {
 		panic(fmt.Errorf("Could not determine whether or not a file or folder exists : %s", err.Error()))
 
@@ -82,7 +82,7 @@ func WriteFile(path string, data []byte) error {
 
 type RealFileSystem struct{}
 
-func (f *RealFileSystem) TargetInfo(path string) (*Target, error) {
+func (f *RealFileSystem) FileInfo(path string) (*Target, error) {
 	fileInfo, err := os.Stat(path)
 	if err == nil {
 		return &Target{ExistingFile: true, IsDir: fileInfo.IsDir(), ModificationTime: fileInfo.ModTime()}, nil

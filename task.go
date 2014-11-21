@@ -110,7 +110,7 @@ func InvokeTask(invokedName string, recursionDepth int, args ...string) (bool, e
 	checkHooks(HookBefore, invokedName, recursionDepth)
 
 	resolvedDependencies[invokedName] = true
-	target := TargetInfo(invokedName)
+	target := FileInfo(invokedName)
 
 	debugPrefix := ""
 	log.SetDebugIndent(0)
@@ -173,7 +173,7 @@ func checkDependencies(target *Target, dependencies []string, recursionDepth int
 
 	someDependencyUpdatedOrNewer := false
 	for _, dependency := range dependencies {
-		depInfo := TargetInfo(dependency)
+		depInfo := FileInfo(dependency)
 		if target.ExistingFile && depInfo.ExistingFile && depInfo.ModificationTime.After(target.ModificationTime) {
 			log.Debug("Dependency [<strong>%s</strong>] is newer than [<strong>%s</strong>] so that needs to be rebuild", dependency, target.Name)
 			someDependencyUpdatedOrNewer = true

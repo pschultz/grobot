@@ -69,7 +69,7 @@ var _ = Describe("Install transitive dependencies", func() {
 			shell.EXPECT().Execute("git rev-parse HEAD", true).Return("dependency1_version", nil),
 			shell.EXPECT().SetWorkingDirectory(""),
 
-			fileSystem.EXPECT().TargetInfo(vendorDir1+"/bot.json").Return(&grobot.Target{ExistingFile: true}, nil),
+			fileSystem.EXPECT().FileInfo(vendorDir1+"/bot.json").Return(&grobot.Target{ExistingFile: true}, nil),
 			fileSystem.EXPECT().ReadFile(vendorDir1+"/bot.json").Return(dependencyBotConfig, nil),
 
 			shell.EXPECT().Execute("git clone https://code.google.com/foo/bar "+vendorDir2, true),
@@ -142,7 +142,7 @@ var _ = Describe("Install transitive dependencies", func() {
 			shell.EXPECT().Execute("git rev-parse HEAD", true).Return("dependency1_version", nil),
 			shell.EXPECT().SetWorkingDirectory(""),
 
-			fileSystem.EXPECT().TargetInfo(vendorDir1+"/bot.json").Return(&grobot.Target{ExistingFile: true}, nil),
+			fileSystem.EXPECT().FileInfo(vendorDir1+"/bot.json").Return(&grobot.Target{ExistingFile: true}, nil),
 			fileSystem.EXPECT().ReadFile(vendorDir1+"/bot.json").Return(dependencyBotConfig1, nil),
 
 			shell.EXPECT().Execute("git clone https://code.google.com/foo/bar "+vendorDir2, true),
@@ -150,7 +150,7 @@ var _ = Describe("Install transitive dependencies", func() {
 			shell.EXPECT().Execute("git rev-parse HEAD", true).Return("dependency2_version", nil),
 			shell.EXPECT().SetWorkingDirectory(""),
 
-			fileSystem.EXPECT().TargetInfo(vendorDir2+"/bot.json").Return(&grobot.Target{ExistingFile: true}, nil),
+			fileSystem.EXPECT().FileInfo(vendorDir2+"/bot.json").Return(&grobot.Target{ExistingFile: true}, nil),
 			fileSystem.EXPECT().ReadFile(vendorDir2+"/bot.json").Return(dependencyBotConfig2, nil),
 		)
 

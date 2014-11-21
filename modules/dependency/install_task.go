@@ -78,7 +78,7 @@ func installPackage(p *PackageDefinition) (bool, error) {
 
 	vendorDir := getInstallDestination(p.Name)
 	log.Debug("Trying to install package %S from %s repo version %s", p.Name, p.Source.Typ, p.Source.Version)
-	targetInfo := grobot.TargetInfo(vendorDir)
+	targetInfo := grobot.FileInfo(vendorDir)
 	if targetInfo.ExistingFile {
 		log.Debug("Directory %S does already exist", vendorDir)
 		return false, checkIfPackageHasRequestedVersion(vendorDir, p)

@@ -34,7 +34,7 @@ func newGitPackage(name, version string) *PackageDefinition {
 }
 
 func loadLockFile() (*LockFile, error) {
-	targetInfo := grobot.TargetInfo(LockFileName)
+	targetInfo := grobot.FileInfo(LockFileName)
 
 	if targetInfo.ExistingFile == false {
 		log.Debug("Lock file %S does not yet exist", LockFileName)

@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestGrobot(t *testing.T) {
+func TestDependencyModule(t *testing.T) {
 	log.SetOutputWriter(new(testAPI.TestLogger))
 	RegisterFailHandler(testAPI.LoggedFailHandler)
 	RunSpecsWithDefaultAndCustomReporters(t, "Dependency module test suite", []Reporter{&testAPI.LoggedReporter{}})
