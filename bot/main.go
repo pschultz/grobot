@@ -7,6 +7,7 @@ import (
 	// import modules
 	_ "github.com/fgrosse/grobot/modules/dependency"
 	_ "github.com/fgrosse/grobot/modules/ginkgo"
+	_ "github.com/fgrosse/grobot/modules/golint"
 	_ "github.com/fgrosse/grobot/modules/gomock"
 
 	"flag"
