@@ -31,12 +31,12 @@ var _ = Describe("FileSystem", func() {
 
 	Describe("FileInfo", func() {
 		It("should ask the FileSystemProvider if a file exists and for the modification date", func() {
-			fileSystem.EXPECT().FileInfo(somePath).Return(&grobot.Target{}, nil)
+			fileSystem.EXPECT().FileInfo(somePath).Return(&grobot.File{}, nil)
 			grobot.FileInfo(somePath)
 		})
 
 		It("should return the result from the file system provider", func() {
-			expectedFileInfo := &grobot.Target{
+			expectedFileInfo := &grobot.File{
 				ExistingFile:     true,
 				IsDir:            true,
 				ModificationTime: time.Now(),
@@ -48,7 +48,7 @@ var _ = Describe("FileSystem", func() {
 
 		It("should panic if the FileSystemProvider returns any errors", func() {
 			expectedErr := errors.New("oh noes!!!")
-			fileSystem.EXPECT().FileInfo(somePath).Return(&grobot.Target{}, expectedErr)
+			fileSystem.EXPECT().FileInfo(somePath).Return(&grobot.File{}, expectedErr)
 
 			defer func() {
 				r := recover()

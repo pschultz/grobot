@@ -21,20 +21,20 @@ var (
 
 func AssertFileExists(path string, modTime time.Time, fileSystem *mocks.MockFileSystem) {
 	log.Debug(">> Asserting file [%s] exist with modification date %s", path, modTime.Format("15:04:05"))
-	targetInfo := grobot.Target{ExistingFile: true, IsDir: false, ModificationTime: modTime}
-	fileSystem.EXPECT().FileInfo(path).Return(&targetInfo, nil).AnyTimes()
+	fileInfo := grobot.File{ExistingFile: true, IsDir: false, ModificationTime: modTime}
+	fileSystem.EXPECT().FileInfo(path).Return(&fileInfo, nil).AnyTimes()
 }
 
 func AssertFileDoesNotExist(path string, fileSystem *mocks.MockFileSystem) {
 	log.Debug(">> Asserting file [%s] does not exist", path)
-	targetInfo := grobot.Target{ExistingFile: false}
-	fileSystem.EXPECT().FileInfo(path).Return(&targetInfo, nil).AnyTimes()
+	fileInfo := grobot.File{ExistingFile: false}
+	fileSystem.EXPECT().FileInfo(path).Return(&fileInfo, nil).AnyTimes()
 }
 
 func AssertDirectoryDoesNotExist(path string, fileSystem *mocks.MockFileSystem) {
 	log.Debug(">> Asserting directory [%s] does not exist", path)
-	targetInfo := grobot.Target{ExistingFile: false}
-	fileSystem.EXPECT().FileInfo(path).Return(&targetInfo, nil).AnyTimes()
+	fileInfo := grobot.File{ExistingFile: false}
+	fileSystem.EXPECT().FileInfo(path).Return(&fileInfo, nil).AnyTimes()
 }
 
 func AssertNoFiles(fileSystem *mocks.MockFileSystem, args ...string) {
@@ -44,14 +44,14 @@ func AssertNoFiles(fileSystem *mocks.MockFileSystem, args ...string) {
 }
 
 func AssertEmptyFileSystem(fileSystem *mocks.MockFileSystem) {
-	targetInfo := grobot.Target{ExistingFile: false}
-	fileSystem.EXPECT().FileInfo(gomock.Any()).Return(&targetInfo, nil).AnyTimes()
+	fileInfo := grobot.File{ExistingFile: false}
+	fileSystem.EXPECT().FileInfo(gomock.Any()).Return(&fileInfo, nil).AnyTimes()
 }
 
 func AssertFileWithContentExists(path, content string, modTime time.Time, fileSystem *mocks.MockFileSystem) {
 	log.Debug(">> Asserting file [%s] with some content exist with modification date %s", path, modTime.Format("15:04:05"))
-	targetInfo := grobot.Target{ExistingFile: true, IsDir: false, ModificationTime: modTime}
-	fileSystem.EXPECT().FileInfo(path).Return(&targetInfo, nil).AnyTimes()
+	fileInfo := grobot.File{ExistingFile: true, IsDir: false, ModificationTime: modTime}
+	fileSystem.EXPECT().FileInfo(path).Return(&fileInfo, nil).AnyTimes()
 	fileSystem.EXPECT().ReadFile(path).Return([]byte(content), nil)
 }
 

@@ -12,21 +12,21 @@ func init() {
 }
 
 type FileSystem interface {
-	FileInfo(path string) (*Target, error)
+	FileInfo(path string) (*File, error)
 	ReadFile(path string) ([]byte, error)
 	WriteFile(path string, data []byte) error
 }
 
 var FileSystemProvider FileSystem
 
-type Target struct {
+type File struct {
 	Name             string
 	ExistingFile     bool
 	IsDir            bool
 	ModificationTime time.Time
 }
 
-func (t *Target) targetExistsMessage() string {
+func (t *File) targetExistsMessage() string {
 	fileType := "File"
 	if t.IsDir {
 		fileType = "Folder"
@@ -34,7 +34,7 @@ func (t *Target) targetExistsMessage() string {
 	return fmt.Sprintf("%s [<strong>%s</strong>] does already exist", fileType, t.Name)
 }
 
-func (t *Target) Typ() string {
+func (t *File) Typ() string {
 	if t.IsDir {
 		return "folder"
 	}
@@ -51,7 +51,7 @@ func DirectoryExists(path string) bool {
 	return targetInfo.ExistingFile && targetInfo.IsDir
 }
 
-func FileInfo(path string) *Target {
+func FileInfo(path string) *File {
 	targetInfo, err := FileSystemProvider.FileInfo(path)
 	if err != nil {
 		panic(fmt.Errorf("Could not determine whether or not a file or folder exists : %s", err.Error()))
@@ -82,15 +82,15 @@ func WriteFile(path string, data []byte) error {
 
 type RealFileSystem struct{}
 
-func (f *RealFileSystem) FileInfo(path string) (*Target, error) {
+func (f *RealFileSystem) FileInfo(path string) (*File, error) {
 	fileInfo, err := os.Stat(path)
 	if err == nil {
-		return &Target{ExistingFile: true, IsDir: fileInfo.IsDir(), ModificationTime: fileInfo.ModTime()}, nil
+		return &File{ExistingFile: true, IsDir: fileInfo.IsDir(), ModificationTime: fileInfo.ModTime()}, nil
 	}
 	if os.IsNotExist(err) {
-		return &Target{ExistingFile: false}, nil
+		return &File{ExistingFile: false}, nil
 	}
-	return &Target{ExistingFile: false}, err
+	return &File{ExistingFile: false}, err
 }
 
 func (f *RealFileSystem) ReadFile(path string) ([]byte, error) {
