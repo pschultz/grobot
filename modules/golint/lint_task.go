@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"github.com/fgrosse/grobot"
 	"github.com/fgrosse/grobot/log"
+	"github.com/fgrosse/grobot/modules/dependency"
 	"strings"
 )
 
 type LintTask struct {
-	rootDir string
+	rootDir      string
+	ignoredFiles []string
 }
 
 func NewLintTask() *LintTask {
@@ -24,10 +26,20 @@ func (t *LintTask) Description() string {
 }
 
 func (t *LintTask) Invoke(targetName string, args ...string) (bool, error) {
-	t.rootDir = grobot.WorkingDir()
+	t.setup()
 	t.lintDirectory("")
 	grobot.ResetShellWorkingDirectory()
 	return false, nil
+}
+
+func (t *LintTask) setup() {
+	t.rootDir = grobot.WorkingDir()
+	module := grobot.GetModule("Depenency").(*dependency.Module)
+	if module == nil {
+		return
+	}
+
+	t.ignoredFiles = append(t.ignoredFiles, module.VendorDir())
 }
 
 func (t *LintTask) lintDirectory(relativePath string) {
@@ -43,8 +55,8 @@ func (t *LintTask) lintDirectory(relativePath string) {
 	atLeastOneGoFileFound := false
 	for _, f := range filesAndDirs {
 		if f.IsDir {
-			if f.Name == "vendor" {
-				log.Debug("Ignoring vendor folder")
+			if t.isIgnored(relativePath, f.Name) {
+				log.Debug("Ignoring directory %S", f.Name)
 				continue
 			}
 			dirs = append(dirs, f)
@@ -78,4 +90,14 @@ func (t *LintTask) lintDirectory(relativePath string) {
 	for _, d := range dirs {
 		t.lintDirectory(relativePath + d.Name)
 	}
+}
+
+func (t *LintTask) isIgnored(relativePath, fileName string) bool {
+	name := relativePath + fileName
+	for _, ignored := range t.ignoredFiles {
+		if name == ignored {
+			return true
+		}
+	}
+	return false
 }

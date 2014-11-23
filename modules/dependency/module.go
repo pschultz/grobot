@@ -55,3 +55,10 @@ func (m *Module) registerTasks() {
 	grobot.RegisterTask("install", NewInstallTask(m))
 	grobot.RegisterTask("update", NewUpdateTask())
 }
+
+func (m *Module) VendorDir() string {
+	if m.conf == nil {
+		return defaultConfig.VendorsFolder
+	}
+	return m.conf.VendorsFolder
+}
