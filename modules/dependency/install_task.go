@@ -95,7 +95,7 @@ func getInstallDestination(packageName string) string {
 func checkIfPackageHasRequestedVersion(vendorDir string, p *PackageDefinition) (err error) {
 	log.Debug("Checking repository version...")
 
-	grobot.SetWorkingDirectory(vendorDir)
+	grobot.SetShellWorkingDirectory(vendorDir)
 	cvsRef := grobot.ExecuteSilent("git rev-parse HEAD")
 	if cvsRef == p.Source.Version {
 		log.ActionMinor("Package %S already up to date", p.Name)
@@ -103,7 +103,7 @@ func checkIfPackageHasRequestedVersion(vendorDir string, p *PackageDefinition) (
 	} else {
 		err = fmt.Errorf("Package %s : repository at %s is not at the required version %s", p.Name, vendorDir, p.Source.Version)
 	}
-	grobot.ResetWorkingDirectory()
+	grobot.ResetShellWorkingDirectory()
 	return err
 }
 
@@ -115,9 +115,9 @@ func checkoutPackage(vendorDir string, p *PackageDefinition) (updated bool, err 
 	}
 
 	grobot.ExecuteSilent("git clone %s %s", gitURL, vendorDir)
-	grobot.SetWorkingDirectory(vendorDir)
+	grobot.SetShellWorkingDirectory(vendorDir)
 	grobot.ExecuteSilent("git checkout %s --quiet", p.Source.Version)
-	grobot.ResetWorkingDirectory()
+	grobot.ResetShellWorkingDirectory()
 	return true, nil
 }
 

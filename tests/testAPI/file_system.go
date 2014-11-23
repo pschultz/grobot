@@ -60,3 +60,21 @@ func AssertPackageHasNoDependencies(packageName string, fileSystem *mocks.MockFi
 	AssertDirectoryDoesNotExist(vendorDir, fileSystem)
 	AssertFileDoesNotExist(vendorDir+"/"+grobot.ConfigFileName, fileSystem)
 }
+
+func NewFile(path string) *grobot.File {
+	return &grobot.File{
+		Name:             path,
+		ExistingFile:     true,
+		IsDir:            false,
+		ModificationTime: AnyTime,
+	}
+}
+
+func NewDirectory(path string) *grobot.File {
+	return &grobot.File{
+		Name:             path,
+		ExistingFile:     true,
+		IsDir:            true,
+		ModificationTime: AnyTime,
+	}
+}

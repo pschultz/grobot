@@ -2,6 +2,7 @@ package golint
 
 import (
 	"github.com/fgrosse/grobot"
+	"github.com/fgrosse/grobot/modules/generic"
 )
 
 func init() {
@@ -21,5 +22,6 @@ func (m *Module) LoadConfiguration(config *grobot.Configuration) error {
 }
 
 func (m *Module) registerTasks() {
+	generic.RegisterVendorBin("golint", "github.com/golang/lint")
 	grobot.RegisterTask("lint", NewLintTask())
 }

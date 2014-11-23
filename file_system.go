@@ -15,6 +15,8 @@ type FileSystem interface {
 	FileInfo(path string) (*File, error)
 	ReadFile(path string) ([]byte, error)
 	WriteFile(path string, data []byte) error
+	ListFiles(path string) ([]*File, error)
+	WorkingDir() (string, error)
 }
 
 var FileSystemProvider FileSystem
@@ -27,16 +29,12 @@ type File struct {
 }
 
 func (t *File) targetExistsMessage() string {
-	fileType := "File"
-	if t.IsDir {
-		fileType = "Folder"
-	}
-	return fmt.Sprintf("%s [<strong>%s</strong>] does already exist", fileType, t.Name)
+	return fmt.Sprintf("%s [<strong>%s</strong>] does already exist", t.Typ(), t.Name)
 }
 
 func (t *File) Typ() string {
 	if t.IsDir {
-		return "folder"
+		return "directory"
 	}
 	return "file"
 }
@@ -67,9 +65,9 @@ func FileInfo(path string) *File {
 func ReadFile(path string) ([]byte, error) {
 	data, err := FileSystemProvider.ReadFile(path)
 	if err != nil {
-		return data, fmt.Errorf(`Could not read file "%s" : %s`, path, err.Error())
+		err = fmt.Errorf(`Could not read file "%s" : %s`, path, err.Error())
 	}
-	return data, nil
+	return data, err
 }
 
 func WriteFile(path string, data []byte) error {
@@ -78,6 +76,22 @@ func WriteFile(path string, data []byte) error {
 		return fmt.Errorf(`Error while writing file "%s" : %s`, path, err.Error())
 	}
 	return nil
+}
+
+func ListFiles(path string) []*File {
+	files, err := FileSystemProvider.ListFiles(path)
+	if err != nil {
+		panic(fmt.Errorf(`Could not list file of directory "%s" : %s`, path, err.Error()))
+	}
+	return files
+}
+
+func WorkingDir() string {
+	pwd, err := FileSystemProvider.WorkingDir()
+	if err != nil {
+		panic(fmt.Errorf(`Could not get current working directory : %s`, err.Error()))
+	}
+	return pwd
 }
 
 type RealFileSystem struct{}
@@ -99,4 +113,27 @@ func (f *RealFileSystem) ReadFile(path string) ([]byte, error) {
 
 func (f *RealFileSystem) WriteFile(path string, data []byte) error {
 	return ioutil.WriteFile(path, data, 0644)
+}
+
+func (f *RealFileSystem) ListFiles(path string) ([]*File, error) {
+	directoryEntries, err := ioutil.ReadDir(path)
+	if err != nil {
+		return []*File{}, err
+	}
+
+	var files []*File
+	for _, fileInfo := range directoryEntries {
+		file := fileFromOsFileInfo(fileInfo)
+		files = append(files, file)
+	}
+
+	return files, nil
+}
+
+func fileFromOsFileInfo(fileInfo os.FileInfo) *File {
+	return &File{Name: fileInfo.Name(), ExistingFile: true, IsDir: fileInfo.IsDir(), ModificationTime: fileInfo.ModTime()}
+}
+
+func (f *RealFileSystem) WorkingDir() (string, error) {
+	return os.Getwd()
 }

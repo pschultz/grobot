@@ -77,11 +77,11 @@ func updatePackage(packageName string, lockFile *LockFile) (bool, error) {
 	vendorDir := getInstallDestination(packageName)
 	oldVersion := packageInLockFile.Source.Version
 
-	grobot.SetWorkingDirectory(vendorDir)
+	grobot.SetShellWorkingDirectory(vendorDir)
 	grobot.ExecuteSilent("git checkout master --quiet")
 	grobot.ExecuteSilent("git pull")
 	newVersion := grobot.ExecuteSilent("git rev-parse HEAD")
-	grobot.ResetWorkingDirectory()
+	grobot.ResetShellWorkingDirectory()
 
 	if newVersion == oldVersion {
 		log.Print("  Package allready up to date..")

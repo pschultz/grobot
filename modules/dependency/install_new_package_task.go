@@ -52,10 +52,10 @@ func (t *InstallTask) checkInstallationDirectoryDoesNotExist(packageName string)
 
 func (t *InstallTask) checkoutNewPackage(gitURL, vendorDir string) string {
 	grobot.ExecuteSilent("git clone %s %s", gitURL, vendorDir)
-	grobot.SetWorkingDirectory(vendorDir)
+	grobot.SetShellWorkingDirectory(vendorDir)
 	installedVersion := grobot.ExecuteSilent("git rev-parse HEAD")
 	log.Debug("Successfully installed version %S into %S", installedVersion, vendorDir)
-	grobot.ResetWorkingDirectory()
+	grobot.ResetShellWorkingDirectory()
 	return installedVersion
 }
 

@@ -26,15 +26,15 @@ var ShellProvider Shell
 
 // SetWorkingDirectory changes the current working directory for each subsequent call to Execute
 // Note that this is a permanent change so you probably need to use ResetWorkingDirectory when you are done
-func SetWorkingDirectory(format string, args ...interface{}) {
+func SetShellWorkingDirectory(format string, args ...interface{}) {
 	workingDir := fmt.Sprintf(format, args...)
 	ShellProvider.SetWorkingDirectory(workingDir)
 }
 
 // ResetWorkingDirectory sets the current working directory of the shell to its initial state
 // This is equivalent to the call SetWorkingDirectory("") but much nicer to read
-func ResetWorkingDirectory() {
-	SetWorkingDirectory("")
+func ResetShellWorkingDirectory() {
+	SetShellWorkingDirectory("")
 }
 
 // Execute a command on the shell

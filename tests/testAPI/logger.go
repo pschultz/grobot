@@ -8,6 +8,10 @@ import (
 	"github.com/onsi/ginkgo/types"
 )
 
+const defaultStyle = "\x1b[0m"
+const boldStyle = "\x1b[1m"
+const redColor = "\x1b[91m"
+
 var buffer *bytes.Buffer
 
 func getBuffer() *bytes.Buffer {
@@ -19,10 +23,10 @@ func getBuffer() *bytes.Buffer {
 }
 
 func Flush() {
-	fmt.Println("\nLog for failed spec:")
+	fmt.Printf("\n\n%sLog for failed spec:%s\n", redColor+boldStyle, defaultStyle)
 	output := getBuffer().String()
 	if len(output) == 0 {
-		fmt.Println("No messages have been logged..")
+		fmt.Println("No messages have been logged")
 	} else {
 		fmt.Println(output)
 	}
