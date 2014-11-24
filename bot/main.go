@@ -79,16 +79,16 @@ func showHelpText() {
 	log.Print(`Usage:   <strong>bot</strong> [optonal flags] <task> [optional arguments]`)
 	log.Print(`Example: bot -debug install code.google.com/p/gomock`)
 	log.Print(``)
-	log.Print(`Which tasks are available depends on the used configuration file.`)
+	log.Print(`Which tasks are available depends on contents of the configuration file.`)
 	log.Print(``)
-	log.Print(`<strong>The following tasks are available with the default configuration file (%s):</strong>`, grobot.ConfigFileName)
+	log.Print(`<strong>The following tasks are available with the current configuration:</strong>`)
 	grobot.PrintTasks()
 	log.Print(``)
 }
 
 func loadConfigurationFile() {
 	if grobot.FileExists(grobot.ConfigFileName) == false {
-		log.Debug("Default configuration file %S does not exist", grobot.ConfigFileName)
+		log.Debug("Configuration file %S does not exist", grobot.ConfigFileName)
 		grobot.LoadBuiltinConfig()
 		return
 	}
@@ -128,6 +128,5 @@ func filterArgs() []string {
 		args = append(args, a)
 	}
 
-	log.Debug("Args: %v", args)
 	return args
 }

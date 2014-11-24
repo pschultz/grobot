@@ -12,5 +12,5 @@ import (
 func TestGolintModule(t *testing.T) {
 	log.SetOutputWriter(new(testAPI.TestLogger))
 	RegisterFailHandler(testAPI.LoggedFailHandler)
-	RunSpecsWithDefaultAndCustomReporters(t, "Golint module test suite", []Reporter{&testAPI.LoggedReporter{}})
+	RunSpecsWithDefaultAndCustomReporters(t, "golint module    ", []Reporter{&testAPI.LoggedReporter{}})
 }

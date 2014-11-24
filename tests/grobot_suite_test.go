@@ -12,5 +12,5 @@ import (
 func TestGrobot(t *testing.T) {
 	log.SetOutputWriter(new(testAPI.TestLogger))
 	RegisterFailHandler(testAPI.LoggedFailHandler)
-	RunSpecsWithDefaultAndCustomReporters(t, "Grobot main test suite", []Reporter{&testAPI.LoggedReporter{}})
+	RunSpecsWithDefaultAndCustomReporters(t, "bot core API     ", []Reporter{&testAPI.LoggedReporter{}})
 }

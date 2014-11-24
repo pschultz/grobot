@@ -11,7 +11,7 @@ import (
 	"github.com/fgrosse/grobot/modules/dependency"
 )
 
-var _ = Describe("Install transitive dependencies", func() {
+var _ = Describe("install transitive dependencies", func() {
 	var (
 		mockCtrl   *gomock.Controller
 		shell      *MockShell

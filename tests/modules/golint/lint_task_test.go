@@ -11,7 +11,7 @@ import (
 	"github.com/fgrosse/grobot/modules/golint"
 )
 
-var _ = Describe("Codestyle tasks", func() {
+var _ = Describe("golint task", func() {
 	var (
 		mockCtrl   *gomock.Controller
 		shell      *MockShell
@@ -54,7 +54,6 @@ var _ = Describe("Codestyle tasks", func() {
 
 			// first lint all files in root
 			fileSystem.EXPECT().ListFiles("/test/lint").Return(filesInRoot, nil),
-			shell.EXPECT().SetWorkingDirectory(""),
 			shell.EXPECT().Execute(`golint "root_file1.go" "root_file2.go" "root_file3.go"`, false),
 
 			// then descent in the first directory and lint all files on that level
@@ -72,11 +71,10 @@ var _ = Describe("Codestyle tasks", func() {
 			shell.EXPECT().SetWorkingDirectory("package2"),
 			shell.EXPECT().Execute(`golint "p2_file1.go" "p2_file2.go"`, false),
 
-			// reset the shell pwd
-			shell.EXPECT().SetWorkingDirectory(""),
+			ExpectWorkingDirectoryIsReset(shell),
 		)
 
-		task := golint.NewLintTask()
+		task := golint.NewLintTask(golint.DefaultLintConfig)
 		_, err := task.Invoke("lint")
 		Expect(err).NotTo(HaveOccurred())
 	})
@@ -89,12 +87,11 @@ var _ = Describe("Codestyle tasks", func() {
 		gomock.InOrder(
 			fileSystem.EXPECT().WorkingDir().Return("/test/lint", nil),
 			fileSystem.EXPECT().ListFiles("/test/lint").Return(filesInRoot, nil),
-			shell.EXPECT().SetWorkingDirectory(""),
 			shell.EXPECT().Execute(`golint "file1.go"`, false),
-			shell.EXPECT().SetWorkingDirectory(""),
+			ExpectWorkingDirectoryIsReset(shell),
 		)
 
-		task := golint.NewLintTask()
+		task := golint.NewLintTask(golint.DefaultLintConfig)
 		_, err := task.Invoke("lint")
 		Expect(err).NotTo(HaveOccurred())
 	})
@@ -107,12 +104,11 @@ var _ = Describe("Codestyle tasks", func() {
 		gomock.InOrder(
 			fileSystem.EXPECT().WorkingDir().Return("/test/lint", nil),
 			fileSystem.EXPECT().ListFiles("/test/lint").Return(filesInRoot, nil),
-			shell.EXPECT().SetWorkingDirectory(""),
 			shell.EXPECT().Execute(`golint "file1.go"`, false),
-			shell.EXPECT().SetWorkingDirectory(""),
+			ExpectWorkingDirectoryIsReset(shell),
 		)
 
-		task := golint.NewLintTask()
+		task := golint.NewLintTask(golint.DefaultLintConfig)
 		_, err := task.Invoke("lint")
 		Expect(err).NotTo(HaveOccurred())
 	})
@@ -125,10 +121,10 @@ var _ = Describe("Codestyle tasks", func() {
 		gomock.InOrder(
 			fileSystem.EXPECT().WorkingDir().Return("/test/lint", nil),
 			fileSystem.EXPECT().ListFiles("/test/lint").Return(filesInRoot, nil),
-			shell.EXPECT().SetWorkingDirectory(""),
+			ExpectWorkingDirectoryIsReset(shell),
 		)
 
-		task := golint.NewLintTask()
+		task := golint.NewLintTask(golint.DefaultLintConfig)
 		_, err := task.Invoke("lint")
 		Expect(err).NotTo(HaveOccurred())
 	})
@@ -140,12 +136,55 @@ var _ = Describe("Codestyle tasks", func() {
 		gomock.InOrder(
 			fileSystem.EXPECT().WorkingDir().Return("/test/lint", nil),
 			fileSystem.EXPECT().ListFiles("/test/lint").Return(filesInRoot, nil),
-			shell.EXPECT().SetWorkingDirectory(""),
+			ExpectWorkingDirectoryIsReset(shell),
 		)
 
-		task := golint.NewLintTask()
+		task := golint.NewLintTask(golint.DefaultLintConfig)
 		_, err := task.Invoke("lint")
 		Expect(err).NotTo(HaveOccurred())
+	})
+
+	It("should return an error if golint returned any issues", func() {
+		filesInRoot := []*grobot.File{
+			NewFile("file.go"),
+		}
+		gomock.InOrder(
+			fileSystem.EXPECT().WorkingDir().Return("/test/lint", nil),
+			fileSystem.EXPECT().ListFiles("/test/lint").Return(filesInRoot, nil),
+			shell.EXPECT().Execute(`golint "file.go"`, gomock.Any()).Return(`
+				file.go:3:1: This is some error reported by golint
+			`, nil),
+			ExpectWorkingDirectoryIsReset(shell),
+		)
+
+		task := golint.NewLintTask(golint.DefaultLintConfig)
+		_, err := task.Invoke("lint")
+		Expect(err).To(HaveOccurred())
+	})
+
+	Context("with linting rules", func() {
+		var conf *golint.Configuration
+
+		BeforeEach(func() {
+			conf = golint.DefaultLintConfig
+		})
+
+		It(`should allow users to disable warnings of type: "should have comment or be unexported"`, func() {
+			conf.WarnCommentOrBeUnexported = false
+
+			gomock.InOrder(
+				fileSystem.EXPECT().WorkingDir().Return("/test/lint", nil),
+				fileSystem.EXPECT().ListFiles("/test/lint").Return([]*grobot.File{NewFile("file.go")}, nil),
+				shell.EXPECT().Execute(`golint "file.go"`, gomock.Any()).Return(`
+					file.go:3:1: exported type Foo should have comment or be unexported
+				`, nil),
+				ExpectWorkingDirectoryIsReset(shell),
+			)
+
+			task := golint.NewLintTask(conf)
+			_, err := task.Invoke("lint")
+			Expect(err).NotTo(HaveOccurred())
+		})
 	})
 
 	// TODO: it should not lint files in test dir

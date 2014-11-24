@@ -12,5 +12,5 @@ import (
 func TestDependencyModule(t *testing.T) {
 	log.SetOutputWriter(new(testAPI.TestLogger))
 	RegisterFailHandler(testAPI.LoggedFailHandler)
-	RunSpecsWithDefaultAndCustomReporters(t, "Dependency module test suite", []Reporter{&testAPI.LoggedReporter{}})
+	RunSpecsWithDefaultAndCustomReporters(t, "dependency module", []Reporter{&testAPI.LoggedReporter{}})
 }

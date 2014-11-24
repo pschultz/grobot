@@ -11,7 +11,7 @@ import (
 	"net/http"
 )
 
-var _ = Describe("Install tasks", func() {
+var _ = Describe("install task", func() {
 	var (
 		mockCtrl        *gomock.Controller
 		shell           *MockShell

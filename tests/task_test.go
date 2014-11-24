@@ -33,7 +33,7 @@ var _ = Describe("Tasks", func() {
 				task, err := grobot.GetTask("foo/bar")
 				Expect(err).To(HaveOccurred())
 				Expect(task).To(BeNil())
-				Expect(err.Error()).To(Equal("Don't know how to build task 'foo/bar'"))
+				Expect(err.Error()).To(Equal("Don't know how to execute task 'foo/bar'"))
 			})
 		})
 
@@ -61,7 +61,7 @@ var _ = Describe("Tasks", func() {
 				returnedTask, err := grobot.GetTask("blub")
 				Expect(err).To(HaveOccurred())
 				Expect(returnedTask).To(BeNil())
-				Expect(err.Error()).To(Equal("Don't know how to build task 'blub'"))
+				Expect(err.Error()).To(Equal("Don't know how to execute task 'blub'"))
 			})
 		})
 
@@ -158,7 +158,7 @@ var _ = Describe("Tasks", func() {
 			It("should return an error if task has not been registered", func() {
 				_, err := grobot.InvokeTask(path, 0)
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(Equal("Don't know how to build task 'foo/bar.go'"))
+				Expect(err.Error()).To(Equal("Don't know how to execute task 'foo/bar.go'"))
 			})
 
 			It("should invoke the task even though none of the dependencies returned (true, nil) on invoke", func() {

@@ -79,7 +79,7 @@ func GetTask(name string) (Task, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("Don't know how to build task '%s'", name)
+	return nil, fmt.Errorf("Don't know how to execute task '%s'", name)
 }
 
 func PrintTasks() {

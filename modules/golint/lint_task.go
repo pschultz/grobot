@@ -2,6 +2,7 @@ package golint
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/fgrosse/grobot"
 	"github.com/fgrosse/grobot/log"
 	"github.com/fgrosse/grobot/modules/dependency"
@@ -9,15 +10,16 @@ import (
 )
 
 type LintTask struct {
+	conf         *Configuration
 	rootDir      string
 	ignoredFiles []string
 }
 
-func NewLintTask() *LintTask {
-	return &LintTask{}
+func NewLintTask(conf *Configuration) *LintTask {
+	return &LintTask{conf: conf}
 }
 
-func (t *LintTask) Dependencies(invokedName string) []string {
+func (t *LintTask) Dependencies(string) []string {
 	return []string{"vendor/bin/golint"}
 }
 
@@ -25,11 +27,19 @@ func (t *LintTask) Description() string {
 	return "Run golint on all source files"
 }
 
-func (t *LintTask) Invoke(targetName string, args ...string) (bool, error) {
+func (t *LintTask) Invoke(string, ...string) (bool, error) {
 	t.setup()
-	t.lintDirectory("")
+	nrOfIssues := t.lintDirectory("")
 	grobot.ResetShellWorkingDirectory()
-	return false, nil
+
+	switch nrOfIssues {
+	case 0:
+		return false, nil
+	case 1:
+		return false, fmt.Errorf("Golint detected one issue")
+	default:
+		return false, fmt.Errorf("Golint detected %d issues", nrOfIssues)
+	}
 }
 
 func (t *LintTask) setup() {
@@ -42,13 +52,13 @@ func (t *LintTask) setup() {
 	t.ignoredFiles = append(t.ignoredFiles, module.VendorDir())
 }
 
-func (t *LintTask) lintDirectory(relativePath string) {
+func (t *LintTask) lintDirectory(relativePath string) (nrOfIssues int) {
 	absolutePath := t.rootDir
 	if relativePath != "" {
 		absolutePath = absolutePath + "/" + relativePath
 	}
 
-	log.Debug("Linting files in %S", absolutePath)
+	log.Debug("Searching for go files in %S", relativePath)
 	filesAndDirs := grobot.ListFiles(absolutePath)
 	golintCmd := bytes.NewBuffer([]byte(`golint`))
 	dirs := []*grobot.File{}
@@ -79,8 +89,12 @@ func (t *LintTask) lintDirectory(relativePath string) {
 	}
 
 	if atLeastOneGoFileFound {
-		grobot.SetShellWorkingDirectory(relativePath)
-		grobot.Execute(golintCmd.String())
+		if relativePath != "" {
+			log.Action("Linting files in %S", relativePath)
+			grobot.SetShellWorkingDirectory(relativePath)
+		}
+		lintingResult := grobot.Execute(golintCmd.String())
+		nrOfIssues = nrOfIssues + t.getNrOfIssuesFrom(lintingResult)
 	}
 
 	if relativePath != "" {
@@ -88,8 +102,10 @@ func (t *LintTask) lintDirectory(relativePath string) {
 	}
 
 	for _, d := range dirs {
-		t.lintDirectory(relativePath + d.Name)
+		nrOfIssues = nrOfIssues + t.lintDirectory(relativePath+d.Name)
 	}
+
+	return
 }
 
 func (t *LintTask) isIgnored(relativePath, fileName string) bool {
@@ -100,4 +116,24 @@ func (t *LintTask) isIgnored(relativePath, fileName string) bool {
 		}
 	}
 	return false
+}
+
+func (t *LintTask) getNrOfIssuesFrom(lintingResult string) int {
+	lintingResult = strings.TrimSpace(lintingResult)
+	if lintingResult == "" {
+		return 0
+	}
+
+	issues := strings.Split(lintingResult, "\n")
+	reportedIssues := []string{}
+	for _, issue := range issues {
+		if strings.HasSuffix(issue, "foooo") && t.conf.WarnCommentOrBeUnexported == false {
+			// TODO continue here
+			log.Debug("Ignoring issue %S", issue)
+			continue
+		}
+		reportedIssues = append(reportedIssues, issue)
+	}
+
+	return len(reportedIssues)
 }

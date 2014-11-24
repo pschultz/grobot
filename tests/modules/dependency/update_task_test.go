@@ -10,7 +10,7 @@ import (
 	"github.com/fgrosse/grobot/modules/dependency"
 )
 
-var _ = Describe("Update tasks", func() {
+var _ = Describe("update task", func() {
 	var (
 		mockCtrl   *gomock.Controller
 		shell      *MockShell

@@ -11,7 +11,7 @@ import (
 	"github.com/fgrosse/grobot/modules/dependency"
 )
 
-var _ = Describe("Install tasks (new package)", func() {
+var _ = Describe("install task (new package)", func() {
 	var (
 		mockCtrl   *gomock.Controller
 		shell      *MockShell
