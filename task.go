@@ -110,7 +110,7 @@ func InvokeTask(invokedName string, recursionDepth int, args ...string) (bool, e
 	checkHooks(HookBefore, invokedName, recursionDepth)
 
 	resolvedDependencies[invokedName] = true
-	target := TargetInfo(invokedName)
+	target := FileInfo(invokedName)
 
 	debugPrefix := ""
 	log.SetDebugIndent(0)
@@ -168,14 +168,14 @@ func InvokeTask(invokedName string, recursionDepth int, args ...string) (bool, e
 	return targetWasUpdated || hooksUpdated, nil
 }
 
-func checkDependencies(target *Target, dependencies []string, recursionDepth int) (bool, error) {
+func checkDependencies(file *File, dependencies []string, recursionDepth int) (bool, error) {
 	log.SetDebugIndent(3 * recursionDepth)
 
 	someDependencyUpdatedOrNewer := false
 	for _, dependency := range dependencies {
-		depInfo := TargetInfo(dependency)
-		if target.ExistingFile && depInfo.ExistingFile && depInfo.ModificationTime.After(target.ModificationTime) {
-			log.Debug("Dependency [<strong>%s</strong>] is newer than [<strong>%s</strong>] so that needs to be rebuild", dependency, target.Name)
+		depInfo := FileInfo(dependency)
+		if file.ExistingFile && depInfo.ExistingFile && depInfo.ModificationTime.After(file.ModificationTime) {
+			log.Debug("Dependency [<strong>%s</strong>] is newer than [<strong>%s</strong>] so that needs to be rebuild", dependency, file.Name)
 			someDependencyUpdatedOrNewer = true
 		}
 
@@ -184,7 +184,7 @@ func checkDependencies(target *Target, dependencies []string, recursionDepth int
 			return false, err
 		}
 		if dependencyUpdated {
-			log.Debug("Dependency [<strong>%s</strong>] has been updated so [<strong>%s</strong>] needs to be rebuild", dependency, target.Name)
+			log.Debug("Dependency [<strong>%s</strong>] has been updated so [<strong>%s</strong>] needs to be rebuild", dependency, file.Name)
 			someDependencyUpdatedOrNewer = true
 		}
 	}
@@ -193,7 +193,7 @@ func checkDependencies(target *Target, dependencies []string, recursionDepth int
 	return someDependencyUpdatedOrNewer, nil
 }
 
-func checkDependency(dependency *Target, recursionDepth int) (bool, error) {
+func checkDependency(dependency *File, recursionDepth int) (bool, error) {
 	if _, alreadyInvoked := resolvedDependencies[dependency.Name]; alreadyInvoked == true {
 		log.Debug("Skipping dependency [<strong>%s</strong>] (already resolved)", dependency.Name)
 		return false, nil

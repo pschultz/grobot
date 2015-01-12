@@ -78,10 +78,10 @@ func installPackage(p *PackageDefinition) (bool, error) {
 
 	vendorDir := getInstallDestination(p.Name)
 	log.Debug("Trying to install package %S from %s repo version %s", p.Name, p.Source.Typ, p.Source.Version)
-	targetInfo := grobot.TargetInfo(vendorDir)
+	targetInfo := grobot.FileInfo(vendorDir)
 	if targetInfo.ExistingFile {
 		log.Debug("Directory %S does already exist", vendorDir)
-		return false, checkIfPackageHasRequestedVersion(vendorDir, p)
+		return installNewPackageVersion(vendorDir, p)
 	} else {
 		log.Debug("Directory %S does not yet exist", vendorDir)
 		return checkoutPackage(vendorDir, p)
@@ -92,19 +92,21 @@ func getInstallDestination(packageName string) string {
 	return fmt.Sprintf("vendor/src/%s", packageName)
 }
 
-func checkIfPackageHasRequestedVersion(vendorDir string, p *PackageDefinition) (err error) {
+func installNewPackageVersion(vendorDir string, p *PackageDefinition) (updated bool, err error) {
 	log.Debug("Checking repository version...")
 
 	grobot.SetWorkingDirectory(vendorDir)
 	cvsRef := grobot.ExecuteSilent("git rev-parse HEAD")
 	if cvsRef == p.Source.Version {
 		log.ActionMinor("Package %S already up to date", p.Name)
-		err = nil
+		updated = false
 	} else {
-		err = fmt.Errorf("Package %s : repository at %s is not at the required version %s", p.Name, vendorDir, p.Source.Version)
+		log.Action("Updating package %s from version %s to new version %s", p.Name, cvsRef[:8], p.Source.Version[:8])
+		grobot.ExecuteSilent("git checkout %s --quiet", p.Source.Version)
+		updated = true
 	}
 	grobot.ResetWorkingDirectory()
-	return err
+	return
 }
 
 func checkoutPackage(vendorDir string, p *PackageDefinition) (updated bool, err error) {

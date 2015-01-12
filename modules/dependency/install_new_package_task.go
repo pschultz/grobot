@@ -41,7 +41,7 @@ func (t *InstallTask) installNewDependencyRecursive(packageName string, lockFile
 
 func (t *InstallTask) checkInstallationDirectoryDoesNotExist(packageName string) (string, error) {
 	vendorDir := getInstallDestination(packageName)
-	targetInfo := grobot.TargetInfo(vendorDir)
+	targetInfo := grobot.FileInfo(vendorDir)
 	if targetInfo.ExistingFile {
 		return "", fmt.Errorf("Can not install new package %s : directory %s does already exist", packageName, vendorDir)
 	}

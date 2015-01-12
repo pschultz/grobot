@@ -2,6 +2,7 @@ package log
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 )
@@ -19,6 +20,13 @@ var isDebug = false
 var debugIndent int
 var currentColor = defaultStyle
 
+// stubbed out for tests
+var outputWriter io.Writer
+
+func init() {
+	outputWriter = os.Stdout
+}
+
 func EnableDebug() {
 	isDebug = true
 }
@@ -29,7 +37,7 @@ func Print(format string, args ...interface{}) {
 	format = strings.Replace(format, "</strong>", defaultStyle+currentColor, -1)
 	format = strings.Replace(format, "<em>", yellowColor, -1)
 	format = strings.Replace(format, "</em>", defaultStyle+currentColor, -1)
-	fmt.Printf(format+"\n", args...)
+	fmt.Fprintf(outputWriter, format+"\n", args...)
 }
 
 func Debug(format string, args ...interface{}) {
@@ -60,7 +68,7 @@ func Shell(format string, args ...interface{}) {
 }
 
 func coloredOutput(format, color string, args ...interface{}) {
-	fmt.Printf(color+format+defaultStyle, args...)
+	fmt.Fprintf(outputWriter, color+format+defaultStyle, args...)
 }
 
 func coloredOutputLn(format, color string, args ...interface{}) {
@@ -97,4 +105,8 @@ func Pluralize(s string, n int) string {
 		s = s + "s"
 	}
 	return s
+}
+
+func SetOutputWriter(writer io.Writer) {
+	outputWriter = writer
 }

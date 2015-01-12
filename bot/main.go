@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-var BotVersion = grobot.NewVersion("0.8.2")
+var BotVersion = grobot.NewVersion("0.8.3")
 
 var debug = flag.Bool("debug", false, "show a lot more debug information on the tasks")
 var showTasks = flag.Bool("t", false, "Display available tasks with descriptions, then exit.")
@@ -58,7 +58,7 @@ func panicHandler() {
 		var err error
 		switch caughtErr := r.(type) {
 		case error:
-			err = fmt.Errorf("Caught unexpected panic: %s", caughtErr.Error())
+			err = caughtErr
 		case string:
 			err = fmt.Errorf("Caught unexpected panic: %s", caughtErr)
 		default:

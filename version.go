@@ -80,16 +80,23 @@ func (v *Version) String() string {
 	return fmt.Sprintf("%d.%d.%d", v.Major, v.Minor, v.Patch)
 }
 
-func (v *Version) GreaterThen(other *Version) bool {
+func (v *Version) GreaterThan(other *Version) (bool, error) {
+	if v.Branch != "" {
+		if other.Branch == v.Branch {
+			return false, nil
+		}
+		return false, fmt.Errorf("Can not compare two branch versions")
+	}
+
 	if v.Major == other.Major {
 		if v.Minor == other.Minor {
-			return v.Patch > other.Patch
+			return v.Patch > other.Patch, nil
 		}
-		return v.Minor > other.Minor
+		return v.Minor > other.Minor, nil
 	}
-	return v.Major > other.Major
+	return v.Major > other.Major, nil
 }
 
-func (v *Version) LowerThen(other *Version) bool {
-	return other.GreaterThen(v)
+func (v *Version) LowerThan(other *Version) (bool, error) {
+	return other.GreaterThan(v)
 }
