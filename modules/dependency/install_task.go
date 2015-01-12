@@ -102,6 +102,7 @@ func installNewPackageVersion(vendorDir string, p *PackageDefinition) (updated b
 		updated = false
 	} else {
 		log.Action("Updating package %s from version %s to new version %s", p.Name, cvsRef[:8], p.Source.Version[:8])
+		grobot.ExecuteSilent("git fetch")
 		grobot.ExecuteSilent("git checkout %s --quiet", p.Source.Version)
 		updated = true
 	}
