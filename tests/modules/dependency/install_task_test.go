@@ -129,6 +129,7 @@ var _ = Describe("Install tasks", func() {
 				gomock.InOrder(
 					shell.EXPECT().SetWorkingDirectory(vendorDir),
 					shell.EXPECT().Execute("git rev-parse HEAD", true).Return("bb38b72365132e6b4dd1de78edde2866dc90ed13", nil),
+					shell.EXPECT().Execute("git fetch", true),
 					shell.EXPECT().Execute("git checkout "+cvsRev+" --quiet", true),
 					shell.EXPECT().SetWorkingDirectory(""),
 				)
