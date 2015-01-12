@@ -124,6 +124,18 @@ var _ = Describe("Install tasks", func() {
 				_, err := task.Invoke("install")
 				Expect(err).NotTo(HaveOccurred())
 			})
+
+			It("should not report an error if the checkout version does not equal the requested version", func() {
+				gomock.InOrder(
+					shell.EXPECT().SetWorkingDirectory(vendorDir),
+					shell.EXPECT().Execute("git rev-parse HEAD", true).Return("bb38b72365132e6b4dd1de78edde2866dc90ed13", nil),
+					shell.EXPECT().Execute("git checkout "+cvsRev+" --quiet", true),
+					shell.EXPECT().SetWorkingDirectory(""),
+				)
+				task := dependency.NewInstallTask(module)
+				_, err := task.Invoke("install")
+				Expect(err).NotTo(HaveOccurred())
+			})
 		})
 	})
 })
