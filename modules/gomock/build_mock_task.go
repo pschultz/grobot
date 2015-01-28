@@ -52,6 +52,10 @@ func (t *BuildMockFileTask) Invoke(targetName string, args ...string) (bool, err
 		command = fmt.Sprintf(`%s -imports "%s"`, command, mockConfig.Imports)
 	}
 
+	if len(mockConfig.AuxFiles) > 0 {
+		command = fmt.Sprintf(`%s -aux_files=%s"`, command, mockConfig.AuxFilesString())
+	}
+
 	grobot.Execute(command)
 	return true, nil
 }

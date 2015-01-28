@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-var BotVersion = grobot.NewVersion("0.8.4")
+var BotVersion = grobot.NewVersion("0.9.0")
 
 var debug = flag.Bool("debug", false, "show a lot more debug information on the tasks")
 var showTasks = flag.Bool("t", false, "Display available tasks with descriptions, then exit.")
