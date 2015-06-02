@@ -84,7 +84,7 @@ func updatePackage(packageName string, lockFile *LockFile) (bool, error) {
 	grobot.ResetWorkingDirectory()
 
 	if newVersion == oldVersion {
-		log.Print("  Package allready up to date..")
+		log.Print("  Package already up to date..")
 		return false, nil
 	} else {
 		log.Print("  Installed new version %S", newVersion)
